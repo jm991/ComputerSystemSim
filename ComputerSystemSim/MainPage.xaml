@@ -1,0 +1,29 @@
+﻿<Page
+    x:Class="ComputerSystemSim.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ComputerSystemSim"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+	<Page.Resources>
+		<DataTemplate x:Key="EventsTemplate">
+			<Grid>
+				<TextBlock Text="{Binding ArrivalTime}"/>
+			</Grid>
+		</DataTemplate>
+	</Page.Resources>
+
+    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+    	<TextBox x:Name="RandBox" HorizontalAlignment="Left" Height="86" Margin="10,10,0,0" TextWrapping="Wrap" Text="Console!" VerticalAlignment="Top" Width="237"/>
+    	<Button x:Name="RandBtn" Content="Generate random number" HorizontalAlignment="Left" Margin="252,10,0,0" VerticalAlignment="Top" Click="RandBtn_Click"/>
+    	<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Left" Margin="10,328,0,0" VerticalAlignment="Top" Click="TickBtn_Click"/>
+    	<TextBlock x:Name="TickBlock" HorizontalAlignment="Left" Margin="10,371,0,0" TextWrapping="Wrap" Text="{Binding Path=SimClockTicks}" VerticalAlignment="Top" Width="115" Height="49"/>
+    	<StackPanel x:Name="UserGroups" Margin="147,140,1073,46">
+    		<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,19" Height="170" GroupName="User Group 1" InterarrivalERVGMean="20"/>
+    		<local:UserGroup x:Name="UserGroup2" Margin="0,0,0,19" Height="170" GroupName="User Group 2" InterarrivalERVGMean="40"/>
+    		<local:UserGroup x:Name="UserGroup3" Margin="0,0,0,19" Height="170" GroupName="User Group 3" InterarrivalERVGMean="12.5"/>
+    	</StackPanel>
+    	<local:SystemComponent HorizontalAlignment="Left" Height="179" Margin="399,301,0,0" VerticalAlignment="Top" Width="365"/>
+    </Grid>
+</Page>
