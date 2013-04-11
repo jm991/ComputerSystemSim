@@ -8,18 +8,48 @@ using Windows.UI.Xaml.Controls;
 
 namespace ComputerSystemSim
 {
-    public class Event : INotifyPropertyChanged
+    public class Job : INotifyPropertyChanged
     {
         #region Variables (private)
 
         private string uniqueID;
-        private UserGroup creator;
+        private UserGroupData creator;
         private int arrivalTime;
 
         #endregion
 
 
         #region Properties (public)
+
+        public string Creator
+        {
+            get
+            {
+                string creatorName = creator.View.GroupName;
+                if (creatorName.Contains("1"))
+                    return "UserGroup1.png";
+                else if (creatorName.Contains("2"))
+                    return "UserGroup2.png";
+                else
+                    return "UserGroup3.png";
+            }
+            set
+            {
+                OnPropertyChanged("Creator");
+            }
+        }
+
+        public string JobTitle
+        {
+            get
+            {
+                return "Job " + uniqueID;
+            }
+            set
+            {
+                OnPropertyChanged("JobTitle");
+            }
+        }
 
         public int ArrivalTime
         {
@@ -36,12 +66,12 @@ namespace ComputerSystemSim
 
         #endregion
 
-        public Event()
+        public Job()
         {
             this.arrivalTime = 0;
         }
 
-        public Event(int arrivalTime, UserGroup creator)
+        public Job(int arrivalTime, UserGroupData creator)
         {
             this.arrivalTime = arrivalTime;
             this.creator = creator;

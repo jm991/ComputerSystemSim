@@ -11,7 +11,13 @@
 	<UserControl.Resources>
 		<DataTemplate x:Key="EventsTemplate">
 			<Grid>
-				<TextBlock Text="{Binding ArrivalTime}"/>
+				<StackPanel Margin="0,0,0,0" Orientation="Horizontal">
+					<Image Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="70" Source="{Binding Creator}"/>
+					<StackPanel Margin="0,0,0,5" Orientation="Vertical">
+						<TextBlock Text="{Binding JobTitle}"/>
+						<TextBlock Text="{Binding ArrivalTime}"/>
+					</StackPanel>
+				</StackPanel>
 			</Grid>
 		</DataTemplate>
 	</UserControl.Resources>
@@ -19,18 +25,22 @@
     <Grid>
     	<Grid>
     		<StackPanel VerticalAlignment="Top">
-    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="Hello"/>
-    			<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown}"/>
+    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="System Component Name"/>
+    			<Grid>
+    				<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
+    				<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
+    			</Grid>
     			<Grid>
     				<TextBlock x:Name="ProcessBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
     					<Run Text="Process "/>
     					<Run Text="exp: "/>
     				</TextBlock>
-    				<TextBox x:Name="ProcessBox" TextWrapping="Wrap" Text="Enter processing exponential mean here" Margin="79,0,0,0"/>
+    				<TextBlock x:Name="ProcessBox" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" TextTrimming="WordEllipsis"/>
     			</Grid>
+    			<TextBlock x:Name="QueueBox" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Jobs in queue: "/>
     		</StackPanel>
     		<ScrollViewer Margin="0,65,0,0">
-    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}"/>
+    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding EventQueue}"/>
     		</ScrollViewer>
     	</Grid>
 

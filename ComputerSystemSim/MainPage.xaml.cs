@@ -30,9 +30,7 @@ namespace ComputerSystemSim
 
         private const int warmupJobs = 3000;
 
-        private SortedSet<Event> eventList;
-
-        private int simClockTicks = 0;
+        private static int simClockTicks = 0;
 
         // Operating at tenth of second granularity
         private const int TICKS_PER_SECOND = 10;
@@ -43,6 +41,14 @@ namespace ComputerSystemSim
 
 
         #region Properties (public)
+
+        public static int SimClockTicksStatic
+        {
+            get
+            {
+                return simClockTicks;
+            }
+        }
 
         public int SimClockTicks
         {
@@ -66,8 +72,6 @@ namespace ComputerSystemSim
             
             // Should separate the data out into its own object type
             this.DataContext = this;
-
-            eventList = new SortedSet<Event>(new SortByArrivalTime());
         }
 
         /// <summary>
@@ -77,6 +81,13 @@ namespace ComputerSystemSim
         /// property is typically used to configure the page.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            foreach (var child in UserGroups.Children)
+            {
+                if (child is UserGroup)
+                {
+                    (child as UserGroup).Data.Goal = Mac.Data;
+                }
+            }
         }
 
         private void RandBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -92,11 +103,22 @@ namespace ComputerSystemSim
         private void TickBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             Update();
+            
+            // Generate events from user groups
             foreach (var child in UserGroups.Children)
             {
                 if (child is UserGroup)
                 {
-                    (child as UserGroup).Update();
+                    (child as UserGroup).Data.Update();
+                }
+            }
+
+            // Generate events from components of system
+            foreach (var child in SystemComponents.Children)
+            {
+                if (child is SystemComponent)
+                {
+                    (child as SystemComponent).Data.Update();
                 }
             }
         }
@@ -116,13 +138,5 @@ namespace ComputerSystemSim
         }
 
         #endregion
-    }
-
-    public class SortByArrivalTime : IComparer<Event>
-    {
-        public int Compare(Event x, Event y)
-        {
-            return x.ArrivalTime.CompareTo(y.ArrivalTime);
-        }
     }
 }

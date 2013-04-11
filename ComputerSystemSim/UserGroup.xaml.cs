@@ -18,27 +18,31 @@ using System.Collections.ObjectModel;
 
 namespace ComputerSystemSim
 {
-    public sealed partial class UserGroup : UserControl, Updatable, INotifyPropertyChanged
+    public sealed partial class UserGroup : UserControl, INotifyPropertyChanged
     {
         #region Variables (private)
 
-        private int curEventCooldown = 0;
-
-        private ObservableCollection<Event> eventQueue;
+        private UserGroupData data;
 
         #endregion
 
 
         #region Properties (public)
 
-        public ObservableCollection<Event> EventQueue
+        public int Count
         {
-            get { return eventQueue; }
-            set 
+            get { return data.CurEventCooldown; }
+            set
             {
-                eventQueue = value;
-                OnPropertyChanged("EventQueue");
+                data.CurEventCooldown = value;
+                OnPropertyChanged("Count");
             }
+        }
+
+        public UserGroupData Data
+        {
+            get { return data; }
+            set { data = value; }
         }
 
         public double InterarrivalERVGMean
@@ -61,13 +65,20 @@ namespace ComputerSystemSim
             set { SetValue(GroupNameProperty, value); }
         }
 
-        public int CurEventCooldown
+        #endregion
+
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
         {
-            get { return curEventCooldown; }
-            set
+            PropertyChangedEventHandler handler = PropertyChanged;
+
+            if (handler != null)
             {
-                curEventCooldown = value;
-                OnPropertyChanged("CurEventCooldown");
+                handler(this, new PropertyChangedEventArgs(name));
             }
         }
 
@@ -81,15 +92,15 @@ namespace ComputerSystemSim
             "GroupName",
             typeof(string),
             typeof(UserGroup),
-            new PropertyMetadata(0, new PropertyChangedCallback(ChangeText))
+            new PropertyMetadata(0, new PropertyChangedCallback(ChangeGroupName))
         );
 
-        private static void ChangeText(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        private static void ChangeGroupName(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as UserGroup).UpdateText(e.NewValue.ToString());
+            (source as UserGroup).UpdateGroupName(e.NewValue.ToString());
         }
 
-        private void UpdateText(string newText)
+        private void UpdateGroupName(string newText)
         {
             NameBox.Text = newText;
         }
@@ -115,64 +126,23 @@ namespace ComputerSystemSim
         #endregion
 
 
+        #region Constructors 
+
         public UserGroup()
         {
-            EventQueue = new ObservableCollection<Event>();
-
             this.InitializeComponent();
 
-            // TODO: move to external data class
-            this.DataContext = this;
+            data = new UserGroupData(this);
+
+            this.DataContext = data;
         }
 
-        public Event GenerateArrival()
-        {
-            CurEventCooldown = (int)PseudoRandomGenerator.ExponentialRVG(InterarrivalERVGMean);
-            Event newEvent = new Event(CurEventCooldown, this);
+        #endregion
 
-            return newEvent;
-        }
 
-        public void Update()
-        {
-            CurEventCooldown -= 1;
+        #region Methods
 
-            // TODO: should be exactly zero; otherwise something wrong has happened
-            if (CurEventCooldown <= 0)
-            {
-                EventQueue.Add(GenerateArrival());
-            }
-        }
 
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            object o = EventsListBox.SelectedItem;
-            if (o != null)
-            {
-                Event selEvent = o as Event;
-                
-                int val;
-                bool parse = int.TryParse(textBox1.Text, out val);
-                if (parse)
-                {
-                    selEvent.ArrivalTime = val;
-                }
-            }
-        }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string name)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
-        }
 
         #endregion
     }

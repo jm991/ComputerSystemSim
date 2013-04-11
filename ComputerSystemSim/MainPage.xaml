@@ -15,15 +15,25 @@
 	</Page.Resources>
 
     <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
-    	<TextBox x:Name="RandBox" HorizontalAlignment="Left" Height="86" Margin="10,10,0,0" TextWrapping="Wrap" Text="Console!" VerticalAlignment="Top" Width="237"/>
-    	<Button x:Name="RandBtn" Content="Generate random number" HorizontalAlignment="Left" Margin="252,10,0,0" VerticalAlignment="Top" Click="RandBtn_Click"/>
-    	<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Left" Margin="10,328,0,0" VerticalAlignment="Top" Click="TickBtn_Click"/>
-    	<TextBlock x:Name="TickBlock" HorizontalAlignment="Left" Margin="10,371,0,0" TextWrapping="Wrap" Text="{Binding Path=SimClockTicks}" VerticalAlignment="Top" Width="115" Height="49"/>
-    	<StackPanel x:Name="UserGroups" Margin="147,140,1073,46">
-    		<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,19" Height="170" GroupName="User Group 1" InterarrivalERVGMean="20"/>
-    		<local:UserGroup x:Name="UserGroup2" Margin="0,0,0,19" Height="170" GroupName="User Group 2" InterarrivalERVGMean="40"/>
-    		<local:UserGroup x:Name="UserGroup3" Margin="0,0,0,19" Height="170" GroupName="User Group 3" InterarrivalERVGMean="12.5"/>
+    	<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+    		<TextBox x:Name="RandBox" TextWrapping="Wrap" Text="Console!" VerticalAlignment="Top" Height="100" Width="250"/>
+    		<Button x:Name="RandBtn" Content="Generate random number" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RandBtn_Click"/>
     	</StackPanel>
-    	<local:SystemComponent HorizontalAlignment="Left" Height="179" Margin="399,301,0,0" VerticalAlignment="Top" Width="365"/>
+    	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+    		<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+    			<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="TickBtn_Click"/>
+    			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClockTicks}"/>
+    		</StackPanel>
+    		<StackPanel x:Name="UserGroups" Margin="15">
+    			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupName="User Group 1" InterarrivalERVGMean="20"/>
+    			<local:UserGroup x:Name="UserGroup2" Margin="0,0,0,50" GroupName="User Group 2" InterarrivalERVGMean="40"/>
+    			<local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5"/>
+    		</StackPanel>
+    		<StackPanel x:Name="SystemComponents" Orientation="Horizontal" Margin="15">
+    			<local:SystemComponent x:Name="Mac" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,40,0" ComponentName="Mac" ProcessMean="4.5" Height="200" Width="250"/>
+    			<local:SystemComponent x:Name="NeXT" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,40,0" ComponentName="NeXTstation" ProcessMean="5" Height="200" Width="250"/>
+    			<local:SystemComponent x:Name="Printer" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Height="200" Width="250" ComponentName="LaserJet" ProcessMean="5.8"/>
+    		</StackPanel>
+    	</StackPanel>
     </Grid>
 </Page>

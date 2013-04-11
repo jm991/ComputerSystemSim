@@ -10,30 +10,18 @@
     d:DesignWidth="400">
     
     <Grid>
-        <Grid.Resources>
-            <DataTemplate x:Key="EventsTemplate">
-                <Grid>
-                    <TextBlock Text="{Binding Path=ArrivalTime}"/>
-                </Grid>
-            </DataTemplate>
-        </Grid.Resources>
         
-    	<StackPanel Margin="0" VerticalAlignment="Top">
-    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="Hello"/>
-    		<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown}"/>
+    	<StackPanel VerticalAlignment="Top">
+    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name"/>
+    		<Grid>
+    			<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
+                <TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding Path=CurEventCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
+    		</Grid>
     		<Grid>
     			<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Interarrival exp: "/>
-    			<TextBox x:Name="InterarrivalBox" TextWrapping="Wrap" Text="Enter interarrival exponential mean here" Margin="79,0,0,0"/>
+    			<TextBlock x:Name="InterarrivalBox" TextWrapping="Wrap" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16"/>
     		</Grid>
     	</StackPanel>
-        
-    	<ScrollViewer Margin="0,65,0,50">
-    		<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding EventQueue}"/>
-    	</ScrollViewer>
-    	<Grid Margin="0" VerticalAlignment="Bottom">
-    		<TextBox x:Name="textBox1" FontWeight="Bold" FontSize="16" Margin="0,0,95,0" InputScope="Number"/>
-    		<Button x:Name="button1" Content="Update" Click="button1_Click" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-    	</Grid>
 
     </Grid>
 </UserControl>

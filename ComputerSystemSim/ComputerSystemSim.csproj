@@ -100,9 +100,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -112,13 +109,16 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PseudoRandomGenerator.cs" />
+    <Compile Include="SortedObservableCollection.cs" />
     <Compile Include="SystemComponent.xaml.cs">
       <DependentUpon>SystemComponent.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SystemComponentData.cs" />
     <Compile Include="Updatable.cs" />
     <Compile Include="UserGroup.xaml.cs">
       <DependentUpon>UserGroup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserGroupData.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -130,6 +130,18 @@
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
+    <Content Include="UserGroup1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>UserGroup1.png</Link>
+    </Content>
+    <Content Include="UserGroup2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>UserGroup2.png</Link>
+    </Content>
+    <Content Include="UserGroup3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>UserGroup3.png</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
