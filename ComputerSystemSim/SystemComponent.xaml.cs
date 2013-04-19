@@ -10,6 +10,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
@@ -38,13 +39,13 @@ namespace ComputerSystemSim
             get
             {
                 double val = 0;
-                bool parsed = double.TryParse(GetValue(ProcessProperty).ToString(), out val);
+                bool parsed = double.TryParse(GetValue(ProcessMeanProperty).ToString(), out val);
                 if (parsed)
                     return val;
                 else
                     return -1;  // error val
             }
-            set { SetValue(ProcessProperty, value); }
+            set { SetValue(ProcessMeanProperty, value); }
         }
 
         public string ComponentName
@@ -53,45 +54,79 @@ namespace ComputerSystemSim
             set { SetValue(ComponentNameProperty, value); }
         }
 
+        public Uri IconSource
+        {
+            get { return GetValue(IconSourceProperty) as Uri; }
+            set
+            {
+                SetValue(IconSourceProperty, value);
+            }
+        }
+
+        public Job.EventTypes EventType
+        {
+            get { return (Job.EventTypes) GetValue(EventTypeProperty); }
+            set
+            {
+                SetValue(EventTypeProperty, value);
+            }
+        }
+
         #endregion
 
 
         #region Dependency Properties
 
+        public static readonly DependencyProperty EventTypeProperty = DependencyProperty.Register
+        (
+            "EventType",
+            typeof(Job.EventTypes),
+            typeof(SystemComponent),
+            new PropertyMetadata(new PropertyChangedCallback(OnEventTypeChanged))
+        );
+
+        private static void OnEventTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as SystemComponent).Data.EventType = (Job.EventTypes) e.NewValue;
+        }
+
+        public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
+        (
+            "IconSource",
+            typeof(Uri),
+            typeof(SystemComponent),
+            new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
+        );
+
+        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as SystemComponent).GroupImage.Source = new BitmapImage((Uri) e.NewValue);
+        }
+
         public static readonly DependencyProperty ComponentNameProperty = DependencyProperty.Register
         (
             "ComponentName",
             typeof(string),
-            typeof(UserGroup),
-            new PropertyMetadata(0, new PropertyChangedCallback(ChangeComponentName))
+            typeof(SystemComponent),
+            new PropertyMetadata(0, new PropertyChangedCallback(ComponentNameChanged))
         );
 
-        private static void ChangeComponentName(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        private static void ComponentNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as SystemComponent).UpdateComponentName(e.NewValue.ToString());
+            (source as SystemComponent).NameBox.Text = e.NewValue.ToString();
         }
 
-        private void UpdateComponentName(string newText)
-        {
-            NameBox.Text = newText;
-        }
-
-        public static readonly DependencyProperty ProcessProperty = DependencyProperty.Register
+        public static readonly DependencyProperty ProcessMeanProperty = DependencyProperty.Register
         (
             "ProcessMean",
             typeof(double),
             typeof(SystemComponent),
-            new PropertyMetadata(0, new PropertyChangedCallback(ChangeProcessMean))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnProcessMeanChanged))
         );
 
-        private static void ChangeProcessMean(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        private static void OnProcessMeanChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as SystemComponent).UpdateProcessMean(e.NewValue);
-        }
-
-        private void UpdateProcessMean(Object newDouble)
-        {
-            ProcessBox.Text = "" + newDouble.ToString();
+            (source as SystemComponent).ProcessBox.Text = "" + e.NewValue;
         }
 
         #endregion
@@ -104,8 +139,9 @@ namespace ComputerSystemSim
             this.InitializeComponent();
 
             data = new SystemComponentData(this);
-
+            
             this.DataContext = data;
+            this.GroupImage.DataContext = this;
         }
 
         #endregion
@@ -113,7 +149,10 @@ namespace ComputerSystemSim
 
         #region Methods
 
-
+        public void SetCurJobViewer(Job job)
+        {
+            CurJobViewer.DataContext = job;
+        }
 
         #endregion
     }

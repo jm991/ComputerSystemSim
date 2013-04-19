@@ -103,10 +103,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Event.cs" />
+    <Compile Include="Job.cs" />
+    <Compile Include="ExitNodeData.cs" />
+    <Compile Include="ExitNode.xaml.cs">
+      <DependentUpon>ExitNode.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="JobViewer.xaml.cs">
+      <DependentUpon>JobViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PseudoRandomGenerator.cs" />
     <Compile Include="SortedObservableCollection.cs" />
@@ -130,18 +138,33 @@
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Exit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mac.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NeXT.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Printer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="UserGroup1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>UserGroup1.png</Link>
     </Content>
+    <Content Include="UserGroup1.png" />
     <Content Include="UserGroup2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>UserGroup2.png</Link>
     </Content>
+    <Content Include="UserGroup2.png" />
     <Content Include="UserGroup3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>UserGroup3.png</Link>
     </Content>
+    <Content Include="UserGroup3.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -149,6 +172,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Common\StandardStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ExitNode.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="JobViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

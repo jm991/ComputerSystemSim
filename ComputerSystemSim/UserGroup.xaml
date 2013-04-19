@@ -10,18 +10,22 @@
     d:DesignWidth="400">
     
     <Grid>
-        
-    	<StackPanel VerticalAlignment="Top">
-    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name"/>
-    		<Grid>
-    			<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
-                <TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding Path=CurEventCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
-    		</Grid>
-    		<Grid>
-    			<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Interarrival exp: "/>
-    			<TextBlock x:Name="InterarrivalBox" TextWrapping="Wrap" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16"/>
-    		</Grid>
-    	</StackPanel>
+    	<StackPanel Orientation="Horizontal">
 
+            <Image x:Name="GroupImage" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding IconSource}" Margin="0,0,5,0"/>
+        
+    		<StackPanel VerticalAlignment="Top">
+    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name"/>
+    			<Grid>
+    				<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
+    				<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
+    			</Grid>
+    			<Grid>
+    				<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Interarrival exp: "/>
+    				<TextBlock x:Name="InterarrivalBox" TextWrapping="Wrap" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16"/>
+    			</Grid>
+    		</StackPanel>
+
+    	</StackPanel>
     </Grid>
 </UserControl>

@@ -13,6 +13,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using Windows.UI.Xaml.Media.Imaging;
+using System.Diagnostics;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -28,16 +30,6 @@ namespace ComputerSystemSim
 
 
         #region Properties (public)
-
-        public int Count
-        {
-            get { return data.CurEventCooldown; }
-            set
-            {
-                data.CurEventCooldown = value;
-                OnPropertyChanged("Count");
-            }
-        }
 
         public UserGroupData Data
         {
@@ -65,6 +57,15 @@ namespace ComputerSystemSim
             set { SetValue(GroupNameProperty, value); }
         }
 
+        public Uri IconSource
+        {
+            get { return GetValue(IconSourceProperty) as Uri; }
+            set 
+            {
+                SetValue(IconSourceProperty, value);
+            }
+        }
+
         #endregion
 
 
@@ -87,22 +88,30 @@ namespace ComputerSystemSim
 
         #region Dependency Properties
 
+        public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
+        (
+            "IconSource",
+            typeof(Uri), 
+            typeof(UserGroup),
+            new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
+        );
+
+        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as UserGroup).GroupImage.Source = new BitmapImage((Uri)e.NewValue);
+        }
+
         public static readonly DependencyProperty GroupNameProperty = DependencyProperty.Register
         (
             "GroupName",
             typeof(string),
             typeof(UserGroup),
-            new PropertyMetadata(0, new PropertyChangedCallback(ChangeGroupName))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnGroupNameChanged))
         );
 
-        private static void ChangeGroupName(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        private static void OnGroupNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as UserGroup).UpdateGroupName(e.NewValue.ToString());
-        }
-
-        private void UpdateGroupName(string newText)
-        {
-            NameBox.Text = newText;
+            (source as UserGroup).NameBox.Text = e.NewValue.ToString();
         }
 
         public static readonly DependencyProperty InterarrivalProperty = DependencyProperty.Register
@@ -110,18 +119,13 @@ namespace ComputerSystemSim
             "InterarrivalERVGMean",
             typeof(double),
             typeof(UserGroup),
-            new PropertyMetadata(0, new PropertyChangedCallback(ChangeInterarrival))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnInterarrivalChanged))
         );
 
-        private static void ChangeInterarrival(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        private static void OnInterarrivalChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as UserGroup).UpdateInterarrival(e.NewValue);
+            (source as UserGroup).InterarrivalBox.Text = "" + e.NewValue;
         }
-
-        private void UpdateInterarrival(Object newDouble)
-        {
-            InterarrivalBox.Text = "" + newDouble.ToString();
-        } 
 
         #endregion
 
@@ -135,6 +139,7 @@ namespace ComputerSystemSim
             data = new UserGroupData(this);
 
             this.DataContext = data;
+            this.GroupImage.DataContext = this;
         }
 
         #endregion

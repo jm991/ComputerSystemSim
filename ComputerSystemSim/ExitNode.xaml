@@ -1,0 +1,37 @@
+﻿<UserControl
+    x:Class="ComputerSystemSim.ExitNode"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ComputerSystemSim"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+	<UserControl.Resources>
+		<DataTemplate x:Key="EventsTemplate">
+			<Grid>
+				<StackPanel Margin="0,0,0,0" Orientation="Horizontal">
+					<Image Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="70" Source="{Binding CreatorImageURI}"/>
+					<StackPanel Margin="0,0,0,5" Orientation="Vertical">
+						<TextBlock Text="{Binding JobTitle}"/>
+						<TextBlock Text="{Binding ArrivalTime}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+	</UserControl.Resources>
+    
+    <Grid>
+    	<StackPanel Orientation="Vertical">
+    		<Image HorizontalAlignment="Center" VerticalAlignment="Top" Source="Exit.png" Stretch="None" Margin="0,0,0,5"/>
+			<StackPanel Orientation="Horizontal">
+    			<TextBlock x:Name="QueueBox" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Completed jobs: " Margin="0"/>
+    			<TextBlock x:Name="NumJobs" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding CompletedJobs}" Margin="10,0,0,0"/>
+    		</StackPanel>
+    		<ScrollViewer Height="270">
+    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}"/>
+    		</ScrollViewer>
+    	</StackPanel>
+    </Grid>
+</UserControl>

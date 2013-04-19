@@ -12,20 +12,20 @@ namespace ComputerSystemSim
     /// </summary>
     public class SortedObservableCollection<T> : ObservableCollection<T>
     {
-        private readonly Func<T, int> func;
+        private readonly Func<T, double> func;
 
-        public SortedObservableCollection(Func<T, int> func)
+        public SortedObservableCollection(Func<T, double> func)
         {
             this.func = func;
         }
 
-        public SortedObservableCollection(Func<T, int> func, IEnumerable<T> collection)
+        public SortedObservableCollection(Func<T, double> func, IEnumerable<T> collection)
             : base(collection)
         {
             this.func = func;
         }
 
-        public SortedObservableCollection(Func<T, int> func, List<T> list)
+        public SortedObservableCollection(Func<T, double> func, List<T> list)
             : base(list)
         {
             this.func = func;

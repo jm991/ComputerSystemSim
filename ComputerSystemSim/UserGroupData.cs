@@ -13,14 +13,30 @@ namespace ComputerSystemSim
 
         private UserGroup view;
 
-        private int curEventCooldown = 0;
+        private double curEventCooldown = 0;
         
-        private SystemComponentData goal;
+        private Updatable goal;
         
         #endregion
 
 
         #region Properties (public)
+
+        public string Name
+        {
+            get
+            {
+                return view.GroupName;
+            }
+        }
+
+        public Job.EventTypes EventType
+        {
+            get
+            {
+                return Job.EventTypes.UG_FINISH;
+            }
+        }
 
         public UserGroup View
         {
@@ -28,13 +44,13 @@ namespace ComputerSystemSim
             set { view = value; }
         }
 
-        public SystemComponentData Goal
+        public Updatable Goal
         {
             get { return goal; }
             set { goal = value; }
         }
 
-        public int CurEventCooldown
+        public double CurEventCooldown
         {
             get { return curEventCooldown; }
             set
@@ -78,19 +94,27 @@ namespace ComputerSystemSim
 
         public Job GenerateArrival()
         {
-            CurEventCooldown = (int)PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);
-            Job newEvent = new Job(CurEventCooldown + MainPage.SimClockTicksStatic, this);
+            CurEventCooldown = PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);
+            Job newJob = new Job(CurEventCooldown + MainPage.SimClockTicksStatic, this, MainPage.SimClockTicksStatic);
 
-            return newEvent;
+            return newJob;
+        }
+
+        public Job GenerateArrival(double simulationClock)
+        {
+            CurEventCooldown = PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);
+            Job newJob = new Job(CurEventCooldown + simulationClock, this, simulationClock);
+
+            return newJob;
         }
 
         public void Update()
         {
             CurEventCooldown -= 1;
 
-            if (CurEventCooldown <= 0)
+            if (CurEventCooldown <= 0 && goal is SystemComponentData)
             {
-                goal.EventQueue.Add(GenerateArrival());
+                (goal as SystemComponentData).JobQueue.Add(GenerateArrival());
             }
         }
 

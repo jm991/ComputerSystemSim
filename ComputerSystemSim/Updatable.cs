@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace ComputerSystemSim
 {
-    interface Updatable
+    public interface Updatable
     {
+        string Name { get; }
+
+        Job.EventTypes EventType { get; }                
+
         void Update();
     }
 }
