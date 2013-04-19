@@ -14,16 +14,14 @@ namespace ComputerSystemSim
 
         private string uniqueID;
         private Updatable creator;
-
         private double arrivalTime;
-
         private double systemEntryTime = 0;
         private double systemExitTime = 0;
 
         #endregion
 
 
-        #region Properties (public)
+        #region Properties and enums (public)
 
         public enum EventTypes
         {
@@ -64,21 +62,11 @@ namespace ComputerSystemSim
         {
             get
             {
-                // TODO: make this more robust; find a substitute for the creator.GetName() by storing the image somewhere
-                // TODO: create an abstract class that inherits from UserControl that both SystemComponent, UserGroup inherit from
-                // TODO: make Updatable into abstract class instead of interface
-                if (creator.Name.Contains("1"))
-                    return "UserGroup1.png";
-                else if (creator.Name.Contains("2"))
-                    return "UserGroup2.png";
-                else if (creator.Name.Contains("3"))
-                    return "UserGroup3.png";
-                else if (creator.Name.Contains("Mac"))
-                    return "Mac.png";
-                else if (creator.Name.Contains("NeXT"))
-                    return "NeXT.png";
-                else
-                    return "Printer.png";
+                if (creator != null)
+                {
+                    return creator.IconSource.OriginalString;
+                }
+                return "";
             }
             set
             {
@@ -125,7 +113,7 @@ namespace ComputerSystemSim
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name)
+        public void OnPropertyChanged(string name)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
 
@@ -137,6 +125,9 @@ namespace ComputerSystemSim
 
         #endregion
 
+
+        #region Methods
+
         private string GenerateId()
         {
             long i = 1;
@@ -147,5 +138,7 @@ namespace ComputerSystemSim
 
             return string.Format("{0:x}", i - DateTime.Now.Ticks);
         }
+
+        #endregion
     }
 }

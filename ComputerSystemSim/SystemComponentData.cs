@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 
 namespace ComputerSystemSim
 {
@@ -12,52 +13,51 @@ namespace ComputerSystemSim
     {
         #region Variables (private)
 
-        private SystemComponent view;
-
         private SortedObservableCollection<Job> jobQueue;
 
         private State curState = State.IDLE;
-
-        private Updatable goal;
 
         private double curProcessCooldown = 0;
 
         private Job curJob;
 
+        private Updatable goal;
+
         private double timeIdleAgain = 0;
 
         private double totalTimeIdle = 0;
 
+        private double processMean = 0;
+
+        private Uri iconSource;
+
+        private string name;
+
         private Job.EventTypes eventType;
+
+        private Job emptyJob = new Job(0, null, 0);
 
         #endregion
 
 
         #region Properties (public)
 
-        public string Name
-        {
-            get
-            {
-                return view.ComponentName;
-            }
-        }
+        public double ProcessMean { get { return processMean; } set { processMean = value; } }
+
+        public Uri IconSource { get { return iconSource; } set { iconSource = value; } }
+
+        public string Name { get { return name; } set { name = value; } }
 
         public Job.EventTypes EventType
         {
-            get { return view.EventType; }
-            set { view.EventType = value; }
+            get { return eventType; }
+            set { eventType = value; }
         }
 
         public double TotalTimeIdle
         {
             get { return totalTimeIdle; }
             set { totalTimeIdle = value; }
-        }
-
-        public SystemComponent View
-        {
-            get { return view; }
         }
 
         public double TimeIdleAgain
@@ -74,8 +74,14 @@ namespace ComputerSystemSim
 
         public Updatable Goal
         {
-            get { return goal; }
-            set { goal = value; }
+            get
+            {
+                return goal;
+            }
+            set
+            {
+                goal = value;
+            }
         }
 
         public double CurProcessCooldown
@@ -85,6 +91,22 @@ namespace ComputerSystemSim
             {
                 curProcessCooldown = value;
                 OnPropertyChanged("CurProcessCooldown");
+            }
+        }
+
+        public Job CurJob
+        {
+            get { return curJob; }
+            set 
+            {
+                curJob = value;
+                OnPropertyChanged("CurJob");
+                if (curJob != null)
+                {
+                    OnPropertyChanged("ArrivalTime");
+                    OnPropertyChanged("CreatorImageURI");
+                    OnPropertyChanged("JobTitle");
+                }
             }
         }
 
@@ -113,6 +135,12 @@ namespace ComputerSystemSim
             }
         }
 
+        public double ArrivalTime { get { return curJob != null ? curJob.ArrivalTime : 0; } }
+
+        public string CreatorImageURI { get { return curJob != null ? curJob.CreatorImageURI : ""; } }
+
+        public string JobTitle { get { return curJob != null ? curJob.JobTitle : ""; } }
+
         #endregion
 
 
@@ -135,11 +163,9 @@ namespace ComputerSystemSim
 
         #region Constructors
 
-        public SystemComponentData(SystemComponent view)
+        public SystemComponentData()
         {
             JobQueue = new SortedObservableCollection<Job>(i => i.ArrivalTime);
-
-            this.view = view;
         }
 
         #endregion
@@ -147,11 +173,11 @@ namespace ComputerSystemSim
 
         #region Methods
 
-        public Job PassCurJob()
+        private Job PassCurJob()
         {
-            curJob.ArrivalTime = MainPage.SimClockTicksStatic;
+            CurJob.ArrivalTime = MainPage.SimClockTicksStatic;
 
-            return curJob;
+            return CurJob;
         }
 
         public void Update()
@@ -167,20 +193,21 @@ namespace ComputerSystemSim
                     if (CurProcessCooldown <= 0)
                     {
                         // TODO: make something better for organizing these classes under a subclass
-                        if (goal is SystemComponentData)
+                        // TODO: probably a bug that this doesn't point to the printer
+                        if (Goal is SystemComponentData)
                         {
-                            if ((goal as SystemComponentData).JobQueue.Count < 9)
+                            if ((Goal as SystemComponentData).JobQueue.Count < 9)
                             {
-                                (goal as SystemComponentData).JobQueue.Add(PassCurJob());
+                                (Goal as SystemComponentData).JobQueue.Add(PassCurJob());
                             }
                             else
                             {
-                                ((goal as SystemComponentData).Goal as ExitNodeData).JobQueue.Add(PassCurJob());
+                                ((Goal as SystemComponentData).Goal as ExitNodeData).JobQueue.Add(PassCurJob());
                             }
                         }
-                        else if (goal is ExitNodeData)
+                        else if (Goal is ExitNodeData)
                         {
-                            (goal as ExitNodeData).JobQueue.Add(PassCurJob());
+                            (Goal as ExitNodeData).JobQueue.Add(PassCurJob());
                         }
 
                         LoadNextJob();
@@ -197,19 +224,18 @@ namespace ComputerSystemSim
         {
             if (JobQueue.Count > 0)
             {
-                curJob = JobQueue[0];
-                view.SetCurJobViewer(curJob);
+                CurJob = JobQueue[0];
 
                 JobQueue.RemoveAt(0);
 
                 curState = State.IN_USE;
 
-                CurProcessCooldown = PseudoRandomGenerator.ExponentialRVG(view.ProcessMean);
+                CurProcessCooldown = PseudoRandomGenerator.ExponentialRVG(ProcessMean);
             }
             else
             {
                 curState = State.IDLE;
-                view.SetCurJobViewer(null);
+                CurJob = emptyJob;
                 CurProcessCooldown = 0;
             }
         }

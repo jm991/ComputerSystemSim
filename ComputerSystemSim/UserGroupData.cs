@@ -22,6 +22,14 @@ namespace ComputerSystemSim
 
         #region Properties (public)
 
+        public Uri IconSource
+        {
+            get
+            {
+                return view.IconSource;
+            }
+        }
+
         public string Name
         {
             get

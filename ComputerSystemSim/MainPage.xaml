@@ -24,6 +24,7 @@
     			<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="TickBtn_Click"/>
     			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClockTicks}"/>
     			<Button x:Name="FullSimBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click"/>
+    			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch"/>
     		</StackPanel>
     		<StackPanel x:Name="UserGroups" Margin="15" HorizontalAlignment="Center" VerticalAlignment="Center">
     			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupName="User Group 1" InterarrivalERVGMean="20" IconSource="UserGroup1.png"/>
@@ -31,9 +32,9 @@
                 <local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5" IconSource="UserGroup3.png"/>
     		</StackPanel>
     		<StackPanel x:Name="SystemComponents" Orientation="Horizontal" Margin="15">
-    			<local:SystemComponent x:Name="Mac" Margin="0,0,52,0" ComponentName="Mac" IconSource="Mac.png" ProcessMean="4.5" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" EventType="MAC_FINISH"/>
-    			<local:SystemComponent x:Name="NeXT" Margin="0,0,40,0" ComponentName="NeXTstation" ProcessMean="5" IconSource="NeXT.png" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" EventType="NEXT_FINISH"/>
-    			<local:SystemComponent x:Name="Printer" Margin="0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="LaserJet" IconSource="Printer.png" ProcessMean="5.8" EventType="LASERJET_FINISH"/>
+    			<local:SystemComponent x:Name="Mac" Margin="0,0,52,0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="Mac" EventType="MAC_FINISH" Goal="{Binding Data, ElementName=NeXT, Mode=TwoWay}" IconSource="Mac.png" ProcessMean="4.5"/>
+    			<local:SystemComponent x:Name="NeXT" Margin="0,0,40,0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="NeXTstation" EventType="NEXT_FINISH" Goal="{Binding Data, ElementName=Printer, Mode=TwoWay}" IconSource="NeXT.png" ProcessMean="5"/>
+    			<local:SystemComponent x:Name="Printer" Margin="0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="LaserJet" EventType="LASERJET_FINISH" Goal="{Binding Data, ElementName=ExitSystem, Mode=TwoWay}" IconSource="Printer.png" ProcessMean="5.8"/>
     		</StackPanel>
     		<local:ExitNode x:Name="ExitSystem" Width="195" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     	</StackPanel>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Windows.Foundation;
@@ -22,6 +23,7 @@ namespace ComputerSystemSim
         #region Variables (private)
 
         private SystemComponentData data;
+        public Updatable GoalTemp;
 
         #endregion
 
@@ -41,9 +43,25 @@ namespace ComputerSystemSim
                 double val = 0;
                 bool parsed = double.TryParse(GetValue(ProcessMeanProperty).ToString(), out val);
                 if (parsed)
+                {
+                    if (val <= 0)
+                    {
+                        this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                        this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                        this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                    }
                     return val;
+                }
                 else
+                {
+                    this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                     return -1;  // error val
+                }
             }
             set { SetValue(ProcessMeanProperty, value); }
         }
@@ -69,6 +87,19 @@ namespace ComputerSystemSim
             set
             {
                 SetValue(EventTypeProperty, value);
+                Data.EventType = EventType;
+            }
+        }
+
+        public Updatable Goal
+        {
+            get 
+            {
+                return (Updatable) GetValue(GoalProperty); 
+            }
+            set
+            {
+                SetValue(GoalProperty, value);
             }
         }
 
@@ -76,6 +107,14 @@ namespace ComputerSystemSim
 
 
         #region Dependency Properties
+
+        public static readonly DependencyProperty GoalProperty = DependencyProperty.Register
+        (
+            "Goal",
+            typeof(Updatable),
+            typeof(SystemComponent),
+            new PropertyMetadata(new PropertyChangedCallback(OnGoalChanged))
+        );
 
         public static readonly DependencyProperty EventTypeProperty = DependencyProperty.Register
         (
@@ -85,11 +124,6 @@ namespace ComputerSystemSim
             new PropertyMetadata(new PropertyChangedCallback(OnEventTypeChanged))
         );
 
-        private static void OnEventTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            (sender as SystemComponent).Data.EventType = (Job.EventTypes) e.NewValue;
-        }
-
         public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
         (
             "IconSource",
@@ -97,11 +131,6 @@ namespace ComputerSystemSim
             typeof(SystemComponent),
             new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
         );
-
-        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            (sender as SystemComponent).GroupImage.Source = new BitmapImage((Uri) e.NewValue);
-        }
 
         public static readonly DependencyProperty ComponentNameProperty = DependencyProperty.Register
         (
@@ -111,11 +140,6 @@ namespace ComputerSystemSim
             new PropertyMetadata(0, new PropertyChangedCallback(ComponentNameChanged))
         );
 
-        private static void ComponentNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
-        {
-            (source as SystemComponent).NameBox.Text = e.NewValue.ToString();
-        }
-
         public static readonly DependencyProperty ProcessMeanProperty = DependencyProperty.Register
         (
             "ProcessMean",
@@ -124,9 +148,52 @@ namespace ComputerSystemSim
             new PropertyMetadata(0, new PropertyChangedCallback(OnProcessMeanChanged))
         );
 
+        #endregion
+
+
+        #region Event handlers
+
+        private void UserControl_LayoutUpdated_1(object sender, object e)
+        {
+            try
+            {
+                Data.Goal = Goal;
+            }
+            catch (InvalidCastException castE)
+            {
+                // Ignore; this happens because I'm waiting for the dependency property to register
+            }
+        }
+
+        private static void OnGoalChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as SystemComponent).Data.Goal = (Updatable)e.NewValue;
+        }
+
+        private static void OnEventTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as SystemComponent).Data.EventType = (Job.EventTypes) e.NewValue;
+        }
+
+        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            Uri iconSource = (Uri)e.NewValue;
+            (sender as SystemComponent).GroupImage.Source = new BitmapImage(iconSource);
+            (sender as SystemComponent).Data.IconSource = iconSource;
+        }
+
+        private static void ComponentNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        {
+            string componentName = e.NewValue.ToString();
+            (source as SystemComponent).NameBox.Text = componentName;
+            (source as SystemComponent).Data.Name = componentName;
+        }
+
         private static void OnProcessMeanChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as SystemComponent).ProcessBox.Text = "" + e.NewValue;
+            double processMean = (double)e.NewValue;
+            (source as SystemComponent).ProcessBox.Text = "" + processMean;
+            (source as SystemComponent).Data.ProcessMean = processMean;
         }
 
         #endregion
@@ -138,8 +205,8 @@ namespace ComputerSystemSim
         {
             this.InitializeComponent();
 
-            data = new SystemComponentData(this);
-            
+            data = new SystemComponentData();
+
             this.DataContext = data;
             this.GroupImage.DataContext = this;
         }
@@ -148,11 +215,6 @@ namespace ComputerSystemSim
 
 
         #region Methods
-
-        public void SetCurJobViewer(Job job)
-        {
-            CurJobViewer.DataContext = job;
-        }
 
         #endregion
     }

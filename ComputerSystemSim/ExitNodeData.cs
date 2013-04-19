@@ -18,6 +18,11 @@ namespace ComputerSystemSim
 
         #region Properties
 
+        public Uri IconSource
+        {
+            get { return new Uri("Exit.png"); }
+        }
+
         public int CompletedJobs
         {
             get { return JobQueue.Count; }
