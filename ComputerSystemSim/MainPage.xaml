@@ -27,9 +27,9 @@
     			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch"/>
     		</StackPanel>
     		<StackPanel x:Name="UserGroups" Margin="15" HorizontalAlignment="Center" VerticalAlignment="Center">
-    			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupName="User Group 1" InterarrivalERVGMean="20" IconSource="UserGroup1.png"/>
-                <local:UserGroup x:Name="UserGroup2" Margin="0,0,0,50" GroupName="User Group 2" InterarrivalERVGMean="40" IconSource="UserGroup2.png"/>
-                <local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5" IconSource="UserGroup3.png"/>
+    			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupName="User Group 1" InterarrivalERVGMean="20" IconSource="UserGroup1.png" Goal="{Binding Data, ElementName=Mac}"/>
+                <local:UserGroup x:Name="UserGroup2" Margin="0,0,0,50" GroupName="User Group 2" InterarrivalERVGMean="40" IconSource="UserGroup2.png" Goal="{Binding Data, ElementName=Mac}"/>
+                <local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5" IconSource="UserGroup3.png" Goal="{Binding Data, ElementName=Mac}"/>
     		</StackPanel>
     		<StackPanel x:Name="SystemComponents" Orientation="Horizontal" Margin="15">
     			<local:SystemComponent x:Name="Mac" Margin="0,0,52,0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="Mac" EventType="MAC_FINISH" Goal="{Binding Data, ElementName=NeXT, Mode=TwoWay}" IconSource="Mac.png" ProcessMean="4.5"/>

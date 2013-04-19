@@ -62,7 +62,7 @@ namespace ComputerSystemSim
         {
             get
             {
-                if (creator != null)
+                if (creator != null && creator.IconSource != null)
                 {
                     return creator.IconSource.OriginalString;
                 }
@@ -101,6 +101,9 @@ namespace ComputerSystemSim
 
         #endregion
 
+
+        #region Constructors 
+
         public Job(double arrivalTime, Updatable creator, double entryTime)
         {
             this.systemEntryTime = entryTime;
@@ -108,6 +111,9 @@ namespace ComputerSystemSim
             this.creator = creator;
             uniqueID = GenerateId();
         }
+
+        #endregion
+
 
         #region INotifyPropertyChanged Members
 

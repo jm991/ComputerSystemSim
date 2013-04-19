@@ -23,7 +23,6 @@ namespace ComputerSystemSim
         #region Variables (private)
 
         private SystemComponentData data;
-        public Updatable GoalTemp;
 
         #endregion
 
@@ -44,22 +43,10 @@ namespace ComputerSystemSim
                 bool parsed = double.TryParse(GetValue(ProcessMeanProperty).ToString(), out val);
                 if (parsed)
                 {
-                    if (val <= 0)
-                    {
-                        this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                        this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                        this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                    }
                     return val;
                 }
                 else
                 {
-                    this.CurJobTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                    this.CurJobArrivalTime.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                     return -1;  // error val
                 }
             }
@@ -153,6 +140,11 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
+        private void EventsListBox_LayoutUpdated(object sender, object e)
+        {
+            CurJobViewer.DataContext = data.CurJob;
+        }
+
         private void UserControl_LayoutUpdated_1(object sender, object e)
         {
             try
@@ -209,6 +201,8 @@ namespace ComputerSystemSim
 
             this.DataContext = data;
             this.GroupImage.DataContext = this;
+
+            CurJobViewer.DataContext = data.CurJob;
         }
 
         #endregion

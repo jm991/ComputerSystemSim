@@ -134,22 +134,6 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
-        /// <summary>
-        /// Invoked when this page is about to be displayed in a Frame.
-        /// </summary>
-        /// <param name="e">Event data that describes how this page was reached.  The Parameter
-        /// property is typically used to configure the page.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            foreach (var child in UserGroups.Children)
-            {
-                if (child is UserGroup)
-                {
-                    (child as UserGroup).Data.Goal = Mac.Data;
-                }
-            }
-        }
-
         private void RandBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             RandBox.Text = "rand: " + PseudoRandomGenerator.RandomNumberGenerator() + "\nexp: " + PseudoRandomGenerator.ExponentialRVG(3200);

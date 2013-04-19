@@ -42,22 +42,14 @@
     			</StackPanel>
     		</StackPanel>
 
-    		<!--<local:JobViewer x:Name="CurJobViewer" HorizontalAlignment="Left" VerticalAlignment="Top"/>-->
-			<StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-				<Image x:Name="CurJobImage" Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="70" Source="{Binding CreatorImageURI}"/>
-				<StackPanel Margin="0,0,0,5" Orientation="Vertical">
-					<TextBlock Text="Current Job"/>
-					<TextBlock x:Name="CurJobTitle" Text="{Binding JobTitle}"/>
-					<TextBlock x:Name="CurJobArrivalTime" Text="{Binding ArrivalTime}"/>
-				</StackPanel>
-			</StackPanel>
+    		<local:JobViewer x:Name="CurJobViewer" HorizontalAlignment="Left" VerticalAlignment="Top"/>
     		<StackPanel Orientation="Horizontal">
     			<TextBlock x:Name="QueueBox" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Jobs in queue: " Margin="0"/>
     			<TextBlock x:Name="NumJobs" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding NumJobs}" Margin="10,0,0,0"/>
     		</StackPanel>
 
     		<ScrollViewer Height="230">
-    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}"/>
+    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}" LayoutUpdated="EventsListBox_LayoutUpdated"/>
     		</ScrollViewer>
     	</StackPanel>
     </Grid>

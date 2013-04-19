@@ -35,8 +35,6 @@ namespace ComputerSystemSim
 
         private Job.EventTypes eventType;
 
-        private Job emptyJob = new Job(0, null, 0);
-
         #endregion
 
 
@@ -74,14 +72,8 @@ namespace ComputerSystemSim
 
         public Updatable Goal
         {
-            get
-            {
-                return goal;
-            }
-            set
-            {
-                goal = value;
-            }
+            get { return goal; }
+            set { goal = value; }
         }
 
         public double CurProcessCooldown
@@ -101,12 +93,6 @@ namespace ComputerSystemSim
             {
                 curJob = value;
                 OnPropertyChanged("CurJob");
-                if (curJob != null)
-                {
-                    OnPropertyChanged("ArrivalTime");
-                    OnPropertyChanged("CreatorImageURI");
-                    OnPropertyChanged("JobTitle");
-                }
             }
         }
 
@@ -134,12 +120,6 @@ namespace ComputerSystemSim
                 OnPropertyChanged("NumJobs");
             }
         }
-
-        public double ArrivalTime { get { return curJob != null ? curJob.ArrivalTime : 0; } }
-
-        public string CreatorImageURI { get { return curJob != null ? curJob.CreatorImageURI : ""; } }
-
-        public string JobTitle { get { return curJob != null ? curJob.JobTitle : ""; } }
 
         #endregion
 
@@ -235,7 +215,7 @@ namespace ComputerSystemSim
             else
             {
                 curState = State.IDLE;
-                CurJob = emptyJob;
+                CurJob = null;
                 CurProcessCooldown = 0;
             }
         }

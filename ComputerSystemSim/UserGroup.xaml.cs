@@ -31,6 +31,18 @@ namespace ComputerSystemSim
 
         #region Properties (public)
 
+        public Updatable Goal
+        {
+            get
+            {
+                return (Updatable)GetValue(GoalProperty);
+            }
+            set
+            {
+                SetValue(GoalProperty, value);
+            }
+        }
+
         public UserGroupData Data
         {
             get { return data; }
@@ -88,6 +100,14 @@ namespace ComputerSystemSim
 
         #region Dependency Properties
 
+        public static readonly DependencyProperty GoalProperty = DependencyProperty.Register
+        (
+            "Goal",
+            typeof(Updatable),
+            typeof(UserGroup),
+            new PropertyMetadata(new PropertyChangedCallback(OnGoalChanged))
+        );
+
         public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
         (
             "IconSource",
@@ -95,11 +115,6 @@ namespace ComputerSystemSim
             typeof(UserGroup),
             new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
         );
-
-        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            (sender as UserGroup).GroupImage.Source = new BitmapImage((Uri)e.NewValue);
-        }
 
         public static readonly DependencyProperty GroupNameProperty = DependencyProperty.Register
         (
@@ -109,11 +124,6 @@ namespace ComputerSystemSim
             new PropertyMetadata(0, new PropertyChangedCallback(OnGroupNameChanged))
         );
 
-        private static void OnGroupNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
-        {
-            (source as UserGroup).NameBox.Text = e.NewValue.ToString();
-        }
-
         public static readonly DependencyProperty InterarrivalProperty = DependencyProperty.Register
         (
             "InterarrivalERVGMean",
@@ -121,6 +131,38 @@ namespace ComputerSystemSim
             typeof(UserGroup),
             new PropertyMetadata(0, new PropertyChangedCallback(OnInterarrivalChanged))
         );
+
+        #endregion  
+
+
+        #region Event handlers
+
+        private void UserControl_LayoutUpdated_1(object sender, object e)
+        {
+            try
+            {
+                Data.Goal = Goal;
+            }
+            catch (InvalidCastException castE)
+            {
+                // Ignore; this happens because I'm waiting for the dependency property to register
+            }
+        }
+
+        private static void OnGoalChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as SystemComponent).Data.Goal = (Updatable)e.NewValue;
+        }
+
+        private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            (sender as UserGroup).GroupImage.Source = new BitmapImage((Uri)e.NewValue);
+        }
+
+        private static void OnGroupNameChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        {
+            (source as UserGroup).NameBox.Text = e.NewValue.ToString();
+        }
 
         private static void OnInterarrivalChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
