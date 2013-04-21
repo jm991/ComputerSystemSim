@@ -104,7 +104,10 @@ namespace ComputerSystemSim
 
         public SortedObservableCollection<Job> JobQueue
         {
-            get { return jobQueue; }
+            get
+            {
+                return jobQueue;
+            }
             set
             {
                 jobQueue = value;

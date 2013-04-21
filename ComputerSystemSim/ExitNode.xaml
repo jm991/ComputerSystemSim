@@ -30,7 +30,13 @@
     			<TextBlock x:Name="NumJobs" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding CompletedJobs}" Margin="10,0,0,0"/>
     		</StackPanel>
     		<ScrollViewer Height="270">
-    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}"/>
+    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}">
+					<ListBox.ItemContainerTransitions>
+						<TransitionCollection>
+							<RepositionThemeTransition/>
+						</TransitionCollection>
+					</ListBox.ItemContainerTransitions>
+				</ListBox>
     		</ScrollViewer>
     	</StackPanel>
     </Grid>

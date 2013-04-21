@@ -13,6 +13,7 @@ namespace ComputerSystemSim
         #region Variables (private)
 
         private string uniqueID;
+        private Updatable locationInSystem;
         private Updatable creator;
         private double arrivalTime;
         private double systemEntryTime = 0;
@@ -48,14 +49,19 @@ namespace ComputerSystemSim
         {
             get
             {
-                return creator.EventType;
+                return locationInSystem.EventType;
             }
+        }
+
+        public Updatable LocationInSystem
+        {
+            get { return locationInSystem; }
+            set { locationInSystem = value; }
         }
 
         public Updatable Creator
         {
             get { return creator; }
-            set { creator = value; }
         }
 
         public string CreatorImageURI
@@ -108,6 +114,7 @@ namespace ComputerSystemSim
         {
             this.systemEntryTime = entryTime;
             this.arrivalTime = arrivalTime;
+            this.locationInSystem = creator;
             this.creator = creator;
             uniqueID = GenerateId();
         }

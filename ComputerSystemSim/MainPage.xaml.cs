@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
@@ -82,6 +83,9 @@ namespace ComputerSystemSim
         private int prevJobsInSystemArea = 0;
         private double prevJobsTime = 0;
 
+        private DispatcherTimer timer;
+        private double currentTime;
+
         // TODO: move animation onto the same system as the full simulation
         private static int simClockTicks = 0;
 
@@ -89,6 +93,19 @@ namespace ComputerSystemSim
 
 
         #region Properties (public)
+
+        public double CurrentTime
+        {
+            get
+            {
+                return currentTime;
+            }
+            set
+            {
+                currentTime = value;
+                OnPropertyChanged("CurrentTime");
+            }
+        }
 
         public static int SimClockTicksStatic
         {
@@ -134,9 +151,33 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
+        void timer_Tick(object sender, object e)
+        {
+            CurrentTime -= 1;
+
+            ComputeSimulationEvent();
+
+
+            if (CurrentTime == 0)
+            {
+                timer.Stop();
+            }
+        }
+
         private void RandBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             RandBox.Text = "rand: " + PseudoRandomGenerator.RandomNumberGenerator() + "\nexp: " + PseudoRandomGenerator.ExponentialRVG(3200);
+        }
+
+        private void SimInitBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            InitializeSimulation();
+            StartTimer();
+        }
+
+        private void SimEventBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ComputeSimulationEvent();
         }
 
         private void TickBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -165,6 +206,113 @@ namespace ComputerSystemSim
 
 
         #region Methods
+
+        private void InitializeSimulation()
+        {
+            simClock = 0;
+            completedJobs = 0;
+            jobQueue = new PriorityQueue<double, Job>();
+
+            // Initializations
+            Job uG1Job = UserGroup1.Data.GenerateArrival(simClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG1Job.ArrivalTime, uG1Job));
+            Job uG2Job = UserGroup2.Data.GenerateArrival(simClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG2Job.ArrivalTime, uG2Job));
+            Job uG3Job = UserGroup3.Data.GenerateArrival(simClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG3Job.ArrivalTime, uG3Job));
+        }
+
+        private async void ComputeSimulationEvent()
+        {
+            if (completedJobs < (WARMUP_JOBS + TOTAL_JOBS))
+            {
+                // Pop next event
+                KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
+
+                // Advance simulation clock
+                simClock = curJob.Value.ArrivalTime;
+
+                // Set necessary variables once warm up period finished
+                if (completedJobs == WARMUP_JOBS && !warmUpValues.SetPostWarmup)
+                {
+                    warmUpValues.Set(true, simClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
+                }
+
+                // Execute it and add new events back to eventQueue
+                switch (curJob.Value.EventType)
+                {
+                    case Job.EventTypes.UG_FINISH:
+                        // Spawn new UserGroup event 
+                        Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
+                        jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
+
+                        // Contributes to computation of L (average number of jobs in the whole system)
+                        UpdateJobsArea();
+
+                        // Send the current job down the system
+                        jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value));
+                        Mac.Data.JobQueue.Add(curJob.Value);
+                        Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
+
+                        break;
+                    case Job.EventTypes.MAC_FINISH:
+                        Storyboard triggered = Mac.FindName("Triggered") as Storyboard;
+                        triggered.Begin();
+                        // await triggered.BeginAsync();
+                        Mac.Data.JobQueue.Remove(curJob.Value);
+                        Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
+                        jobQueue.Add(SystemComponentJobProcess(NeXT.Data, curJob.Value));
+                        NeXT.Data.JobQueue.Add(curJob.Value);
+                        NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
+
+                        break;
+                    case Job.EventTypes.NEXT_FINISH:
+                        Storyboard triggered2 = NeXT.FindName("Triggered") as Storyboard;
+                        triggered2.Begin();
+                        // await triggered2.BeginAsync();
+                        NeXT.Data.JobQueue.Remove(curJob.Value);
+                        NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
+                        if (printerJobs < MAX_PRINTER_JOBS)
+                        {
+                            jobQueue.Add(SystemComponentJobProcess(Printer.Data, curJob.Value));
+                            Printer.Data.JobQueue.Add(curJob.Value);
+                            Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
+                            printerJobs++;
+                        }
+                        else
+                        {
+                            JobExitSystem(curJob, false);
+                            ExitSystem.Data.JobQueue.Add(curJob.Value);
+                            ExitSystem.Data.CompletedJobs = ExitSystem.Data.JobQueue.Count;
+                        }
+
+                        break;
+                    case Job.EventTypes.LASERJET_FINISH:
+                        Storyboard triggered3 = Printer.FindName("Triggered") as Storyboard;
+                        triggered3.Begin();
+                        // await triggered3.BeginAsync();
+                        Printer.Data.JobQueue.Remove(curJob.Value);
+                        Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
+                        JobExitSystem(curJob, true);
+                        ExitSystem.Data.JobQueue.Add(curJob.Value);
+                        ExitSystem.Data.CompletedJobs = ExitSystem.Data.JobQueue.Count;
+                        printerJobs--;
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void StartTimer()
+        {
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(1000);
+            timer.Tick += timer_Tick;
+            CurrentTime = 3000;
+            timer.Start();
+        }
 
         private void ComputeSimulation()
         {
@@ -199,7 +347,7 @@ namespace ComputerSystemSim
                 {
                     case Job.EventTypes.UG_FINISH:
                         // Spawn new UserGroup event 
-                        Job newUGJob = (curJob.Value.Creator as UserGroupData).GenerateArrival(simClock);
+                        Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
                         jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
 
                         // Contributes to computation of L (average number of jobs in the whole system)
@@ -285,7 +433,7 @@ namespace ComputerSystemSim
             }
 
             component.TimeIdleAgain = job.ArrivalTime;
-            job.Creator = component;
+            job.LocationInSystem = component;
 
             return new KeyValuePair<double,Job>(job.ArrivalTime, job);
         }

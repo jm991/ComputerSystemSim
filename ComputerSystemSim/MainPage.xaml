@@ -20,7 +20,14 @@
     		<Button x:Name="RandBtn" Content="Generate random number" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RandBtn_Click"/>
     	</StackPanel>
     	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-    		<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<StackPanel.ChildrenTransitions>
+				<TransitionCollection>
+					<EntranceThemeTransition/>
+				</TransitionCollection>
+			</StackPanel.ChildrenTransitions>
+			<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+    			<Button x:Name="SimInitBtn" Content="Init Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimInitBtn_Click"/>
+    			<Button x:Name="SimEventBtn" Content="Next Event" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimEventBtn_Click"/>
     			<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="TickBtn_Click"/>
     			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClockTicks}"/>
     			<Button x:Name="FullSimBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click"/>
