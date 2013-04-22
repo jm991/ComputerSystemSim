@@ -144,7 +144,6 @@ namespace ComputerSystemSim
 
         private void EventsListBox_LayoutUpdated(object sender, object e)
         {
-            CurJobViewer.DataContext = data.CurJob;
 			if (EventsListBox.Items.Count > 0)
 			{
 				EventsListBox.SelectedIndex = 0;
@@ -207,8 +206,6 @@ namespace ComputerSystemSim
 
             this.DataContext = data;
             this.GroupImage.DataContext = this;
-
-            CurJobViewer.DataContext = data.CurJob;
         }
 
         #endregion

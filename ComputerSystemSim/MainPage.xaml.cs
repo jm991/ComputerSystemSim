@@ -72,6 +72,7 @@ namespace ComputerSystemSim
         private const int WARMUP_JOBS = 1000;
         private const int TRIALS = 30;
         private const int MAX_PRINTER_JOBS = 10;
+        private const int MILLI_PER_SEC = 1000;
 
         private PriorityQueue<double, Job> jobQueue;
         private double simClock = 0;
@@ -86,7 +87,8 @@ namespace ComputerSystemSim
 
         private DispatcherTimer timer;
         private DispatcherTimer timerProg;
-        private const int MILLI_PER_SEC = 1000;
+        private bool animating = true;
+        private bool initialized = false;
 
         // TODO: move animation onto the same system as the full simulation
         private static int simClockTicks = 0;
@@ -106,14 +108,7 @@ namespace ComputerSystemSim
                 }
                 else if (SpeedSlider != null)
                 {
-                    double rounded = Math.Round(SpeedSlider.Value);
-
-                    if (SpeedSlider.Value < 0)
-                    {
-                        rounded = 1 / Math.Abs(rounded);
-                    }
-
-                    return rounded;
+                    return ConvertSliderVal();
                 }
                 return 1;
             }
@@ -142,6 +137,14 @@ namespace ComputerSystemSim
             }
         }
 
+        public bool TrialCompleted
+        {
+            get
+            {
+                return completedJobs >= (WARMUP_JOBS + TOTAL_JOBS);
+            }
+        }
+
         #endregion
 
 
@@ -154,8 +157,7 @@ namespace ComputerSystemSim
             warmUpValues = new WarmUpValues();
             warmUpValues.Init();
 
-            timer = new DispatcherTimer();
-            timerProg = new DispatcherTimer();
+            ResetTimers();
 
             // First random number seed produces bad results, so prime it before app starts
             PseudoRandomGenerator.RandomNumberGenerator();
@@ -179,10 +181,24 @@ namespace ComputerSystemSim
 
         private void timer_Tick(object sender, object e)
         {
-            ComputeSimulationEvent();
-            EventProgressBar.Value = 0;
-
-            if (completedJobs >= (WARMUP_JOBS + TOTAL_JOBS))
+            if (animating)
+            {
+                if (!TrialCompleted)
+                {
+                    if (AnimSpeed != 0)
+                    {
+                        ComputeSimulationEvent();
+                        EventProgressBar.Value = 0;
+                    }
+                }
+                else
+                {
+                    timer.Stop();
+                    initialized = false;
+                    SimInitBtn.IsEnabled = true;
+                }
+            }
+            else
             {
                 timer.Stop();
             }
@@ -192,7 +208,7 @@ namespace ComputerSystemSim
         {
             if (timerProg.Interval.TotalMilliseconds > 0)
             {
-                EventProgressBar.Value += (100 / timerProg.Interval.TotalMilliseconds);
+                EventProgressBar.Value += (EventProgressBar.Maximum / timerProg.Interval.TotalMilliseconds);
             }
             else
             {
@@ -205,30 +221,18 @@ namespace ComputerSystemSim
             }
         }
 
-        private void RandBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            RandBox.Text = "rand: " + PseudoRandomGenerator.RandomNumberGenerator() + "\nexp: " + PseudoRandomGenerator.ExponentialRVG(3200);
-        }
-
         private void SimInitBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            animating = true;
             InitializeSimulation();
-            StartTimer();
+            StartTimers();
             SystemSwitch.IsOn = true;
-        }
-
-        private void SimEventBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            ComputeSimulationEvent();
-        }
-
-        private void TickBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            SimulationTick();
+            SimInitBtn.IsEnabled = false;
         }
 
         private async void FullSimBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            animating = false;
             ProgressBar.IsIndeterminate = true;
 
             var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
@@ -242,6 +246,8 @@ namespace ComputerSystemSim
                 + "\nPrinter util time: " + (1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / (simClock - warmUpValues.SimClockPostWarmup)))
                 + "\nW Avg time per job: " + (totalJobTime / TOTAL_JOBS) + " for " + jobsDone + " jobs"
                 + "\nL Avg jobs in system: " + (totalJobsInSystemArea / (simClock - warmUpValues.SimClockPostWarmup));
+
+            SimInitBtn.IsEnabled = true;
         }
 
         #endregion
@@ -254,6 +260,28 @@ namespace ComputerSystemSim
             simClock = 0;
             completedJobs = 0;
             jobQueue = new PriorityQueue<double, Job>();
+            jobsDone = 0;
+            warmUpValues.Set(false, 0, 0, 0, 0);
+            totalJobTime = 0;
+            printerJobs = 0;
+            totalJobsInSystemArea = 0;
+            prevJobsInSystemArea = 0;
+            prevJobsTime = 0;
+            Mac.Data.TotalTimeIdle = 0;
+            Mac.Data.TimeIdleAgain = 0;
+            Mac.Data.JobQueue.Clear();
+            Mac.Data.NumJobs = 0;
+            NeXT.Data.TotalTimeIdle = 0;
+            NeXT.Data.TimeIdleAgain = 0;
+            NeXT.Data.JobQueue.Clear();
+            NeXT.Data.NumJobs = 0;
+            Printer.Data.TotalTimeIdle = 0;
+            Printer.Data.TimeIdleAgain = 0;
+            Printer.Data.JobQueue.Clear();
+            Printer.Data.NumJobs = 0;
+            ExitSystem.Data.JobQueue.Clear();
+            ExitSystem.Data.CompletedJobs = 0;
+            ResetTimers();
 
             // Initializations
             Job uG1Job = UserGroup1.Data.GenerateArrival(simClock);
@@ -262,28 +290,47 @@ namespace ComputerSystemSim
             jobQueue.Add(new KeyValuePair<double, Job>(uG2Job.ArrivalTime, uG2Job));
             Job uG3Job = UserGroup3.Data.GenerateArrival(simClock);
             jobQueue.Add(new KeyValuePair<double, Job>(uG3Job.ArrivalTime, uG3Job));
+
+            initialized = true;
+        }
+
+        private void ResetTimers()
+        {
+            timer = new DispatcherTimer();
+            timerProg = new DispatcherTimer();
+        }
+
+        private void StartTimers()
+        {
+            timer.Interval = TimeSpan.FromMilliseconds(MILLI_PER_SEC / ConvertSliderVal());
+            timer.Tick += timer_Tick;
+            timer.Start();
+
+            timerProg.Interval = TimeSpan.FromMilliseconds(timer.Interval.TotalMilliseconds / 100);
+            timerProg.Tick += timerProg_Tick;
+            timerProg.Start();
         }
 
         private async void ComputeSimulationEvent()
         {
-            if (completedJobs < (WARMUP_JOBS + TOTAL_JOBS) && AnimSpeed != 0)
+            // Pop next event
+            KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
+
+            // Advance simulation clock
+            simClock = curJob.Value.ArrivalTime;
+
+            // Set necessary variables once warm up period finished
+            if (completedJobs == WARMUP_JOBS && !warmUpValues.SetPostWarmup)
             {
-                // Pop next event
-                KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
+                warmUpValues.Set(true, simClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
+            }
 
-                // Advance simulation clock
-                simClock = curJob.Value.ArrivalTime;
-
-                // Set necessary variables once warm up period finished
-                if (completedJobs == WARMUP_JOBS && !warmUpValues.SetPostWarmup)
-                {
-                    warmUpValues.Set(true, simClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
-                }
-
-                // Execute it and add new events back to eventQueue
-                switch (curJob.Value.EventType)
-                {
-                    case Job.EventTypes.UG_FINISH:
+            // Execute it and add new events back to eventQueue
+            switch (curJob.Value.EventType)
+            {
+                case Job.EventTypes.UG_FINISH:
+                    if (animating)
+                    {
                         Storyboard userGroupScale = (curJob.Value.LocationInSystem as UserGroupData).View.FindName("Triggered") as Storyboard;
                         userGroupScale.SpeedRatio = AnimSpeed;
                         userGroupScale.Begin();
@@ -295,155 +342,116 @@ namespace ComputerSystemSim
                         createJob.SpeedRatio = AnimSpeed;
                         await createJob.BeginAsync();
                         // createJob.Begin();
+                    }
+                    // Spawn new UserGroup event 
+                    Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
+                    jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
 
-                        // Spawn new UserGroup event 
-                        Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
-                        jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
+                    // Contributes to computation of L (average number of jobs in the whole system)
+                    UpdateJobsArea();
 
-                        // Contributes to computation of L (average number of jobs in the whole system)
-                        UpdateJobsArea();
-
-                        // Send the current job down the system
-                        jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value));
+                    // Send the current job down the system
+                    jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value));
+                    if (animating)
+                    {
                         Mac.Data.JobQueue.Add(curJob.Value);
                         Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
+                    }
 
-                        break;
-                    case Job.EventTypes.MAC_FINISH:
+                    break;
+                case Job.EventTypes.MAC_FINISH:
+                    if (animating)
+                    {
                         Storyboard triggered = Mac.FindName("Triggered") as Storyboard;
                         triggered.SpeedRatio = AnimSpeed;
                         triggered.Begin();
                         Mac.Data.JobQueue.Remove(curJob.Value);
                         Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
                         //await triggered.BeginAsync();
+                    }
+                    
+                    curJob = SystemComponentJobProcess(NeXT.Data, curJob.Value);
+                    jobQueue.Add(curJob);
 
-                        jobQueue.Add(SystemComponentJobProcess(NeXT.Data, curJob.Value));
+                    if (animating)
+                    {
                         NeXT.Data.JobQueue.Add(curJob.Value);
                         NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
+                    }
 
-                        break;
-                    case Job.EventTypes.NEXT_FINISH:
+                    break;
+                case Job.EventTypes.NEXT_FINISH:
+                    if (animating)
+                    {
                         Storyboard triggered2 = NeXT.FindName("Triggered") as Storyboard;
                         triggered2.SpeedRatio = AnimSpeed;
                         triggered2.Begin();
                         NeXT.Data.JobQueue.Remove(curJob.Value);
                         NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
                         //await triggered2.BeginAsync();
+                    }
 
-                        if (printerJobs < MAX_PRINTER_JOBS)
+                    if (printerJobs < MAX_PRINTER_JOBS)
+                    {
+                        curJob = SystemComponentJobProcess(Printer.Data, curJob.Value);
+                        jobQueue.Add(curJob);
+                        printerJobs++;
+                        if (animating)
                         {
-                            jobQueue.Add(SystemComponentJobProcess(Printer.Data, curJob.Value));
                             Printer.Data.JobQueue.Add(curJob.Value);
                             Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
-                            printerJobs++;
                         }
-                        else
+                    }
+                    else
+                    {
+                        JobExitSystem(curJob, false);
+                        if (animating)
                         {
-                            JobExitSystem(curJob, false);
                             ExitSystem.Data.JobQueue.Add(curJob.Value);
                             ExitSystem.Data.CompletedJobs = ExitSystem.Data.JobQueue.Count;
                         }
+                    }
 
-                        break;
-                    case Job.EventTypes.LASERJET_FINISH:
+                    break;
+                case Job.EventTypes.LASERJET_FINISH:
+                    if (animating)
+                    {
                         Storyboard triggered3 = Printer.FindName("Triggered") as Storyboard;
                         triggered3.SpeedRatio = AnimSpeed;
                         triggered3.Begin();
                         Printer.Data.JobQueue.Remove(curJob.Value);
                         Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
                         //await triggered3.BeginAsync();
+                    }
 
-                        JobExitSystem(curJob, true);
+                    JobExitSystem(curJob, true);
+                    printerJobs--;
+
+                    if (animating)
+                    {
                         ExitSystem.Data.JobQueue.Add(curJob.Value);
                         ExitSystem.Data.CompletedJobs = ExitSystem.Data.JobQueue.Count;
-                        printerJobs--;
+                    }
 
-                        break;
-                    default:
-                        break;
-                }
+                    break;
+                default:
+                    break;
             }
-        }
-
-        private void StartTimer()
-        {
-            timer.Interval = TimeSpan.FromMilliseconds(1000);
-            timer.Tick += timer_Tick;
-            timer.Start();
-
-            timerProg.Interval = TimeSpan.FromMilliseconds(timer.Interval.TotalMilliseconds / 100);
-            timerProg.Tick += timerProg_Tick;
-            timerProg.Start();
         }
 
         private void ComputeSimulation()
         {
-            simClock = 0;
-            completedJobs = 0;
-            jobQueue = new PriorityQueue<double, Job>();
-
-            // Initializations
-            Job uG1Job = UserGroup1.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG1Job.ArrivalTime, uG1Job));
-            Job uG2Job = UserGroup2.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG2Job.ArrivalTime, uG2Job));
-            Job uG3Job = UserGroup3.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG3Job.ArrivalTime, uG3Job));
-
-            while (completedJobs < (WARMUP_JOBS + TOTAL_JOBS))
+            if (!initialized)
             {
-                // Pop next event
-                KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
-
-                // Advance simulation clock
-                simClock = curJob.Value.ArrivalTime;
-
-                // Set necessary variables once warm up period finished
-                if (completedJobs == WARMUP_JOBS && !warmUpValues.SetPostWarmup)
-                {
-                    warmUpValues.Set(true, simClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
-                }
-
-                // Execute it and add new events back to eventQueue
-                switch (curJob.Value.EventType)
-                {
-                    case Job.EventTypes.UG_FINISH:
-                        // Spawn new UserGroup event 
-                        Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
-                        jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
-
-                        // Contributes to computation of L (average number of jobs in the whole system)
-                        UpdateJobsArea();
-
-                        // Send the current job down the system
-                        jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value));
-
-                        break;
-                    case Job.EventTypes.MAC_FINISH:
-                        jobQueue.Add(SystemComponentJobProcess(NeXT.Data, curJob.Value));
-
-                        break;
-                    case Job.EventTypes.NEXT_FINISH:
-                        if (printerJobs < MAX_PRINTER_JOBS)
-                        {
-                            jobQueue.Add(SystemComponentJobProcess(Printer.Data, curJob.Value));
-                            printerJobs++;
-                        }
-                        else
-                        {
-                            JobExitSystem(curJob, false);
-                        }
-
-                        break;
-                    case Job.EventTypes.LASERJET_FINISH:
-                        JobExitSystem(curJob, true);
-                        printerJobs--;
-
-                        break;
-                    default:
-                        break;
-                }
+                InitializeSimulation();
             }
+
+            while (!TrialCompleted)
+            {                
+                ComputeSimulationEvent();
+            }
+
+            initialized = false;
         }
 
         private void UpdateJobsArea()
@@ -498,31 +506,6 @@ namespace ComputerSystemSim
             job.LocationInSystem = component;
 
             return new KeyValuePair<double,Job>(job.ArrivalTime, job);
-        }
-
-        private void SimulationTick()
-        {
-            SimClockTicks++;
-
-            // Generate events from user groups
-            foreach (var child in UserGroups.Children)
-            {
-                if (child is UserGroup)
-                {
-                    (child as UserGroup).Data.Update();
-                }
-            }
-
-            // Generate events from components of system
-            foreach (var child in SystemComponents.Children)
-            {
-                if (child is SystemComponent)
-                {
-                    (child as SystemComponent).Data.Update();
-                }
-            }
-
-            ExitSystem.Data.Update();
         }
 
         private Storyboard AnimateJobCreation(Point from, Point to, Color color)
@@ -582,6 +565,17 @@ namespace ComputerSystemSim
             {
                 handler(this, new PropertyChangedEventArgs(name));
             }
+        }
+
+        private double ConvertSliderVal()
+        {
+            double rounded = Math.Round(SpeedSlider.Value);
+
+            if (SpeedSlider.Value < 0)
+            {
+                rounded = 1 / Math.Abs(rounded);
+            }
+            return rounded;
         }
 
         #endregion

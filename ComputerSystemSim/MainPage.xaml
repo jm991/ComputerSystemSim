@@ -18,7 +18,6 @@
     <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
     	<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
     		<TextBox x:Name="RandBox" TextWrapping="Wrap" Text="Console!" VerticalAlignment="Top" Height="100" Width="250"/>
-    		<Button x:Name="RandBtn" Content="Generate random number" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RandBtn_Click"/>
     	</StackPanel>
     	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<StackPanel.ChildrenTransitions>
@@ -32,8 +31,6 @@
     			<TextBlock x:Name="EventProgressBox" TextWrapping="Wrap" Text="Event progress:" Height="Auto" Width="Auto"/>
 				<ProgressBar x:Name="EventProgressBar" VerticalAlignment="Stretch"/>
     			<ToggleSwitch x:Name="SystemSwitch" Header="Status" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="Paused" OnContent="Running"/>
-				<Button x:Name="SimEventBtn" Content="Next Event" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimEventBtn_Click"/>
-    			<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="TickBtn_Click"/>
     			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClockTicks}"/>
     			<Button x:Name="FullSimBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click"/>
     			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch"/>

@@ -108,9 +108,6 @@
     <Compile Include="ExitNode.xaml.cs">
       <DependentUpon>ExitNode.xaml</DependentUpon>
     </Compile>
-    <Compile Include="JobViewer.xaml.cs">
-      <DependentUpon>JobViewer.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -177,10 +174,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ExitNode.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="JobViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
