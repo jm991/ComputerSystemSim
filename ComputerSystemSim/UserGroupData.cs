@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
 
 namespace ComputerSystemSim
 {
@@ -16,6 +17,8 @@ namespace ComputerSystemSim
         private double curEventCooldown = 0;
         
         private Updatable goal;
+
+        private Color groupColor = Color.FromArgb(0, 0, 0, 0);
         
         #endregion
 
@@ -28,6 +31,12 @@ namespace ComputerSystemSim
             {
                 return view.IconSource;
             }
+        }
+
+        public Color GroupColor
+        {
+            get { return groupColor; }
+            set { groupColor = value; }
         }
 
         public string Name

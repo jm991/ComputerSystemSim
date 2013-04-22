@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using Windows.UI.Xaml.Media.Imaging;
 using System.Diagnostics;
+using Windows.UI;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -30,6 +31,15 @@ namespace ComputerSystemSim
 
 
         #region Properties (public)
+
+        public Color GroupColor
+        {
+            get { return (Color) GetValue(GroupColorProperty); }
+            set
+            {
+                SetValue(GroupColorProperty, value);
+            }
+        }
 
         public Updatable Goal
         {
@@ -100,12 +110,20 @@ namespace ComputerSystemSim
 
         #region Dependency Properties
 
+        public static readonly DependencyProperty GroupColorProperty = DependencyProperty.Register
+        (
+            "GroupColor",
+            typeof(Color),
+            typeof(UserGroup),
+            new PropertyMetadata(0, new PropertyChangedCallback(OnGroupColorChanged))
+        );
+
         public static readonly DependencyProperty GoalProperty = DependencyProperty.Register
         (
             "Goal",
             typeof(Updatable),
             typeof(UserGroup),
-            new PropertyMetadata(new PropertyChangedCallback(OnGoalChanged))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnGoalChanged))
         );
 
         public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
@@ -113,7 +131,7 @@ namespace ComputerSystemSim
             "IconSource",
             typeof(Uri), 
             typeof(UserGroup),
-            new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnIconSourceChanged))
         );
 
         public static readonly DependencyProperty GroupNameProperty = DependencyProperty.Register
@@ -149,9 +167,14 @@ namespace ComputerSystemSim
             }
         }
 
+        private static void OnGroupColorChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        {
+            (source as UserGroup).Data.GroupColor = (Color)e.NewValue;
+        }
+
         private static void OnGoalChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            (sender as SystemComponent).Data.Goal = (Updatable)e.NewValue;
+            (sender as UserGroup).Data.Goal = (Updatable)e.NewValue;
         }
 
         private static void OnIconSourceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

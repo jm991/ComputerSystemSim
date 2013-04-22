@@ -12,6 +12,7 @@
 				<TextBlock Text="{Binding ArrivalTime}"/>
 			</Grid>
 		</DataTemplate>
+		<local:NegativeToFractionalConverter x:Key="NegativeToFractionalConverter" />
 	</Page.Resources>
 
     <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
@@ -26,17 +27,21 @@
 				</TransitionCollection>
 			</StackPanel.ChildrenTransitions>
 			<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-    			<Button x:Name="SimInitBtn" Content="Init Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimInitBtn_Click"/>
-    			<Button x:Name="SimEventBtn" Content="Next Event" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimEventBtn_Click"/>
+    			<Button x:Name="SimInitBtn" Content="Start Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimInitBtn_Click"/>
+    			<Slider x:Name="SpeedSlider" Maximum="50" Minimum="-5" Value="1" ValueChanged="SpeedSlider_ValueChanged" ThumbToolTipValueConverter="{StaticResource NegativeToFractionalConverter}"/>
+    			<TextBlock x:Name="EventProgressBox" TextWrapping="Wrap" Text="Event progress:" Height="Auto" Width="Auto"/>
+				<ProgressBar x:Name="EventProgressBar" VerticalAlignment="Stretch"/>
+    			<ToggleSwitch x:Name="SystemSwitch" Header="Status" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="Paused" OnContent="Running"/>
+				<Button x:Name="SimEventBtn" Content="Next Event" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="SimEventBtn_Click"/>
     			<Button x:Name="TickBtn" Content="Tick Clock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="TickBtn_Click"/>
     			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClockTicks}"/>
     			<Button x:Name="FullSimBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click"/>
     			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch"/>
     		</StackPanel>
     		<StackPanel x:Name="UserGroups" Margin="15" HorizontalAlignment="Center" VerticalAlignment="Center">
-    			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupName="User Group 1" InterarrivalERVGMean="20" IconSource="UserGroup1.png" Goal="{Binding Data, ElementName=Mac}"/>
-                <local:UserGroup x:Name="UserGroup2" Margin="0,0,0,50" GroupName="User Group 2" InterarrivalERVGMean="40" IconSource="UserGroup2.png" Goal="{Binding Data, ElementName=Mac}"/>
-                <local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5" IconSource="UserGroup3.png" Goal="{Binding Data, ElementName=Mac}"/>
+    			<local:UserGroup x:Name="UserGroup1" Margin="0,0,0,50" GroupColor="Black" Goal="{Binding Data, ElementName=Mac}" GroupName="User Group 1" InterarrivalERVGMean="20" IconSource="UserGroup1.png"/>
+                <local:UserGroup x:Name="UserGroup2" Margin="0,0,0,50" GroupName="User Group 2" InterarrivalERVGMean="40" IconSource="UserGroup2.png" Goal="{Binding Data, ElementName=Mac}" GroupColor="Red"/>
+                <local:UserGroup x:Name="UserGroup3" Margin="0" GroupName="User Group 3" InterarrivalERVGMean="12.5" IconSource="UserGroup3.png" Goal="{Binding Data, ElementName=Mac}" GroupColor="#FFF3FF00"/>
     		</StackPanel>
     		<StackPanel x:Name="SystemComponents" Orientation="Horizontal" Margin="15">
     			<local:SystemComponent x:Name="Mac" Margin="0,0,52,0" Width="225" HorizontalAlignment="Left" VerticalAlignment="Top" ComponentName="Mac" EventType="MAC_FINISH" Goal="{Binding Data, ElementName=NeXT, Mode=TwoWay}" IconSource="Mac.png" ProcessMean="4.5"/>
@@ -45,5 +50,6 @@
     		</StackPanel>
     		<local:ExitNode x:Name="ExitSystem" Width="195" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     	</StackPanel>
+    	<Ellipse x:Name="JobIcon" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="20" Stroke="Black" VerticalAlignment="Top" Width="20" Margin="20,15" Opacity="0" IsHitTestVisible="False"/>
     </Grid>
 </Page>

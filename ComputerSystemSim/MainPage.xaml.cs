@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -84,7 +85,8 @@ namespace ComputerSystemSim
         private double prevJobsTime = 0;
 
         private DispatcherTimer timer;
-        private double currentTime;
+        private DispatcherTimer timerProg;
+        private const int MILLI_PER_SEC = 1000;
 
         // TODO: move animation onto the same system as the full simulation
         private static int simClockTicks = 0;
@@ -94,18 +96,30 @@ namespace ComputerSystemSim
 
         #region Properties (public)
 
-        public double CurrentTime
+        public double AnimSpeed
         {
             get
             {
-                return currentTime;
-            }
-            set
-            {
-                currentTime = value;
-                OnPropertyChanged("CurrentTime");
+                if (SystemSwitch != null && !SystemSwitch.IsOn)
+                {
+                    return 0;
+                }
+                else if (SpeedSlider != null)
+                {
+                    double rounded = Math.Round(SpeedSlider.Value);
+
+                    if (SpeedSlider.Value < 0)
+                    {
+                        rounded = 1 / Math.Abs(rounded);
+                    }
+
+                    return rounded;
+                }
+                return 1;
             }
         }
+
+        public static int JobNumber { get; set; }
 
         public static int SimClockTicksStatic
         {
@@ -140,6 +154,9 @@ namespace ComputerSystemSim
             warmUpValues = new WarmUpValues();
             warmUpValues.Init();
 
+            timer = new DispatcherTimer();
+            timerProg = new DispatcherTimer();
+
             // First random number seed produces bad results, so prime it before app starts
             PseudoRandomGenerator.RandomNumberGenerator();
             
@@ -151,16 +168,40 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
-        void timer_Tick(object sender, object e)
+        private void SpeedSlider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         {
-            CurrentTime -= 1;
+            if (SpeedSlider != null && AnimSpeed != 0)
+            {
+                timer.Interval = TimeSpan.FromMilliseconds(MILLI_PER_SEC / AnimSpeed);
+                timerProg.Interval = TimeSpan.FromMilliseconds(timer.Interval.TotalMilliseconds / 100);
+            }
+        }
 
+        private void timer_Tick(object sender, object e)
+        {
             ComputeSimulationEvent();
+            EventProgressBar.Value = 0;
 
-
-            if (CurrentTime == 0)
+            if (completedJobs >= (WARMUP_JOBS + TOTAL_JOBS))
             {
                 timer.Stop();
+            }
+        }
+
+        private void timerProg_Tick(object sender, object e)
+        {
+            if (timerProg.Interval.TotalMilliseconds > 0)
+            {
+                EventProgressBar.Value += (100 / timerProg.Interval.TotalMilliseconds);
+            }
+            else
+            {
+                EventProgressBar.Value = 100;
+            }
+
+            if (!timer.IsEnabled)
+            {
+                timerProg.Stop();
             }
         }
 
@@ -173,6 +214,7 @@ namespace ComputerSystemSim
         {
             InitializeSimulation();
             StartTimer();
+            SystemSwitch.IsOn = true;
         }
 
         private void SimEventBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -224,7 +266,7 @@ namespace ComputerSystemSim
 
         private async void ComputeSimulationEvent()
         {
-            if (completedJobs < (WARMUP_JOBS + TOTAL_JOBS))
+            if (completedJobs < (WARMUP_JOBS + TOTAL_JOBS) && AnimSpeed != 0)
             {
                 // Pop next event
                 KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
@@ -242,6 +284,18 @@ namespace ComputerSystemSim
                 switch (curJob.Value.EventType)
                 {
                     case Job.EventTypes.UG_FINISH:
+                        Storyboard userGroupScale = (curJob.Value.LocationInSystem as UserGroupData).View.FindName("Triggered") as Storyboard;
+                        userGroupScale.SpeedRatio = AnimSpeed;
+                        userGroupScale.Begin();
+
+                        // Set up animation
+                        Point userGroupPos = (curJob.Value.LocationInSystem as UserGroupData).View.TransformToVisual(Window.Current.Content).TransformPoint(new Point(0, 0));
+                        Point macPos = Mac.TransformToVisual(Window.Current.Content).TransformPoint(new Point(0, 0));
+                        Storyboard createJob = AnimateJobCreation(userGroupPos, macPos, (curJob.Value.LocationInSystem as UserGroupData).GroupColor);
+                        createJob.SpeedRatio = AnimSpeed;
+                        await createJob.BeginAsync();
+                        // createJob.Begin();
+
                         // Spawn new UserGroup event 
                         Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
                         jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
@@ -257,10 +311,12 @@ namespace ComputerSystemSim
                         break;
                     case Job.EventTypes.MAC_FINISH:
                         Storyboard triggered = Mac.FindName("Triggered") as Storyboard;
+                        triggered.SpeedRatio = AnimSpeed;
                         triggered.Begin();
-                        // await triggered.BeginAsync();
                         Mac.Data.JobQueue.Remove(curJob.Value);
                         Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
+                        //await triggered.BeginAsync();
+
                         jobQueue.Add(SystemComponentJobProcess(NeXT.Data, curJob.Value));
                         NeXT.Data.JobQueue.Add(curJob.Value);
                         NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
@@ -268,10 +324,12 @@ namespace ComputerSystemSim
                         break;
                     case Job.EventTypes.NEXT_FINISH:
                         Storyboard triggered2 = NeXT.FindName("Triggered") as Storyboard;
+                        triggered2.SpeedRatio = AnimSpeed;
                         triggered2.Begin();
-                        // await triggered2.BeginAsync();
                         NeXT.Data.JobQueue.Remove(curJob.Value);
                         NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
+                        //await triggered2.BeginAsync();
+
                         if (printerJobs < MAX_PRINTER_JOBS)
                         {
                             jobQueue.Add(SystemComponentJobProcess(Printer.Data, curJob.Value));
@@ -289,10 +347,12 @@ namespace ComputerSystemSim
                         break;
                     case Job.EventTypes.LASERJET_FINISH:
                         Storyboard triggered3 = Printer.FindName("Triggered") as Storyboard;
+                        triggered3.SpeedRatio = AnimSpeed;
                         triggered3.Begin();
-                        // await triggered3.BeginAsync();
                         Printer.Data.JobQueue.Remove(curJob.Value);
                         Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
+                        //await triggered3.BeginAsync();
+
                         JobExitSystem(curJob, true);
                         ExitSystem.Data.JobQueue.Add(curJob.Value);
                         ExitSystem.Data.CompletedJobs = ExitSystem.Data.JobQueue.Count;
@@ -307,11 +367,13 @@ namespace ComputerSystemSim
 
         private void StartTimer()
         {
-            timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += timer_Tick;
-            CurrentTime = 3000;
             timer.Start();
+
+            timerProg.Interval = TimeSpan.FromMilliseconds(timer.Interval.TotalMilliseconds / 100);
+            timerProg.Tick += timerProg_Tick;
+            timerProg.Start();
         }
 
         private void ComputeSimulation()
@@ -463,6 +525,49 @@ namespace ComputerSystemSim
             ExitSystem.Data.Update();
         }
 
+        private Storyboard AnimateJobCreation(Point from, Point to, Color color)
+        {            
+            // Initialize a new instance of the CompositeTransform which allows you 
+            // apply multiple different transforms to the animated object
+            this.JobIcon.Fill = new SolidColorBrush(color);
+            this.JobIcon.RenderTransform = new CompositeTransform();
+
+            // Create the timelines
+            DoubleAnimationUsingKeyFrames animationX = new DoubleAnimationUsingKeyFrames();
+            DoubleAnimationUsingKeyFrames animationY = new DoubleAnimationUsingKeyFrames();
+            DoubleAnimationUsingKeyFrames opacity = new DoubleAnimationUsingKeyFrames();
+
+            // Set up Easing functions
+            ExponentialEase easingFunction = new ExponentialEase();
+            easingFunction.EasingMode = EasingMode.EaseInOut;
+
+            // Add key frames to the timeline
+            animationX.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = from.X });
+            animationX.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = to.X, EasingFunction = easingFunction });
+            animationY.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = from.Y });
+            animationY.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = to.Y, EasingFunction = easingFunction });
+            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = 100 });
+            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds((MILLI_PER_SEC / 2) - (MILLI_PER_SEC / 10)), Value = 100 });
+            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = 0, EasingFunction = easingFunction });
+
+            // Notice the first parameter takes a timeline object not the storyboard itself
+            Storyboard.SetTargetProperty(animationX, "(UIElement.RenderTransform).(CompositeTransform.TranslateX)");
+            Storyboard.SetTargetProperty(animationY, "(UIElement.RenderTransform).(CompositeTransform.TranslateY)");
+            Storyboard.SetTargetProperty(opacity, "UIElement.Opacity");
+            Storyboard.SetTarget(animationX, JobIcon);
+            Storyboard.SetTarget(animationY, JobIcon);
+            Storyboard.SetTarget(opacity, JobIcon);
+
+            // Create the storyboards
+            Storyboard storyboard = new Storyboard() { };
+            // Add the timelines to your storyboard
+            storyboard.Children.Add(animationX);
+            storyboard.Children.Add(animationY);
+            storyboard.Children.Add(opacity);
+
+            return storyboard;
+        }
+
         #endregion
 
         #region INotifyPropertyChanged Members
@@ -481,4 +586,41 @@ namespace ComputerSystemSim
 
         #endregion
     }
+
+    public class NegativeToFractionalConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is double)
+            {
+                double rounded = Math.Round((double) value);
+
+                if (rounded < 0)
+                {
+                    rounded = 1 / Math.Abs(rounded);
+                }
+
+                return rounded;
+            }
+
+            return 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            if (value is double)
+            {
+                double doubleVal = (double) value;
+
+                if (doubleVal < 0)
+                {
+                    return 1 / doubleVal;
+                }
+
+                return doubleVal;
+            }
+
+            return 0;
+        }
+    } 
 }

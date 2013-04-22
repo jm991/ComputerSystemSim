@@ -102,7 +102,7 @@ namespace ComputerSystemSim
             "Goal",
             typeof(Updatable),
             typeof(SystemComponent),
-            new PropertyMetadata(new PropertyChangedCallback(OnGoalChanged))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnGoalChanged))
         );
 
         public static readonly DependencyProperty EventTypeProperty = DependencyProperty.Register
@@ -110,7 +110,7 @@ namespace ComputerSystemSim
             "EventType",
             typeof(Job.EventTypes),
             typeof(SystemComponent),
-            new PropertyMetadata(new PropertyChangedCallback(OnEventTypeChanged))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnEventTypeChanged))
         );
 
         public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register
@@ -118,7 +118,7 @@ namespace ComputerSystemSim
             "IconSource",
             typeof(Uri),
             typeof(SystemComponent),
-            new PropertyMetadata(new PropertyChangedCallback(OnIconSourceChanged))
+            new PropertyMetadata(0, new PropertyChangedCallback(OnIconSourceChanged))
         );
 
         public static readonly DependencyProperty ComponentNameProperty = DependencyProperty.Register
@@ -145,6 +145,10 @@ namespace ComputerSystemSim
         private void EventsListBox_LayoutUpdated(object sender, object e)
         {
             CurJobViewer.DataContext = data.CurJob;
+			if (EventsListBox.Items.Count > 0)
+			{
+				EventsListBox.SelectedIndex = 0;
+			}
         }
 
         private void UserControl_LayoutUpdated_1(object sender, object e)

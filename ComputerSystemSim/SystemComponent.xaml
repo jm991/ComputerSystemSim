@@ -97,7 +97,7 @@
     		</StackPanel>
 
     		<ScrollViewer Height="230">
-    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}" LayoutUpdated="EventsListBox_LayoutUpdated">
+    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}" LayoutUpdated="EventsListBox_LayoutUpdated" IsHitTestVisible="False">
 					<ListBox.ItemContainerTransitions>
 						<TransitionCollection>
 							<RepositionThemeTransition/>
