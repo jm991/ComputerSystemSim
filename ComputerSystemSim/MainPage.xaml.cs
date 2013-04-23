@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
@@ -169,6 +170,16 @@ namespace ComputerSystemSim
         #endregion
 
         #region Event handlers
+
+        private void TextBox_TextChanged_1(object sender, Windows.UI.Xaml.Controls.TextChangedEventArgs e)
+        {
+            if (sender is TextBox)
+            {
+                TextBox senderBox = sender as TextBox;
+
+                senderBox.Text = Regex.Replace(senderBox.Text, @"[^0-9]*", string.Empty, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+            }
+        }
 
         private void SpeedSlider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         {
@@ -580,41 +591,4 @@ namespace ComputerSystemSim
 
         #endregion
     }
-
-    public class NegativeToFractionalConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is double)
-            {
-                double rounded = Math.Round((double) value);
-
-                if (rounded < 0)
-                {
-                    rounded = 1 / Math.Abs(rounded);
-                }
-
-                return rounded;
-            }
-
-            return 0;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            if (value is double)
-            {
-                double doubleVal = (double) value;
-
-                if (doubleVal < 0)
-                {
-                    return 1 / doubleVal;
-                }
-
-                return doubleVal;
-            }
-
-            return 0;
-        }
-    } 
 }

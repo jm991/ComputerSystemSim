@@ -189,7 +189,7 @@ namespace ComputerSystemSim
         private static void OnProcessMeanChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             double processMean = (double)e.NewValue;
-            (source as SystemComponent).ProcessBox.Text = "" + processMean;
+            // (source as SystemComponent).ProcessBox.Text = "" + processMean;
             (source as SystemComponent).Data.ProcessMean = processMean;
         }
 

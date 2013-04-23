@@ -66,9 +66,13 @@ namespace ComputerSystemSim
                 double val = 0;
                 bool parsed = double.TryParse(GetValue(InterarrivalProperty).ToString(), out val);
                 if (parsed)
+                {
                     return val;
+                }
                 else
+                {
                     return -1;  // error val
+                }
             }
             set { SetValue(InterarrivalProperty, value); }
         }
@@ -189,7 +193,9 @@ namespace ComputerSystemSim
 
         private static void OnInterarrivalChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            (source as UserGroup).InterarrivalBox.Text = "" + e.NewValue;
+            double interarrival = (double)e.NewValue;
+            // (source as UserGroup).InterarrivalBox.Text = "" + e.NewValue;
+            (source as UserGroup).Data.InterarrivalERVGMean = interarrival;
         }
 
         #endregion

@@ -40,7 +40,15 @@ namespace ComputerSystemSim
 
         #region Properties (public)
 
-        public double ProcessMean { get { return processMean; } set { processMean = value; } }
+        public double ProcessMean
+        {
+            get { return processMean; }
+            set
+            {
+                processMean = value;
+                OnPropertyChanged("ProcessMean");
+            }
+        }
 
         public Uri IconSource { get { return iconSource; } set { iconSource = value; } }
 

@@ -19,11 +19,23 @@ namespace ComputerSystemSim
         private Updatable goal;
 
         private Color groupColor = Color.FromArgb(0, 0, 0, 0);
+
+        private double interarrivalERVGMean = 0;
         
         #endregion
 
 
         #region Properties (public)
+
+        public double InterarrivalERVGMean
+        {
+            get { return interarrivalERVGMean; }
+            set
+            {
+                interarrivalERVGMean = value;
+                OnPropertyChanged("InterarrivalERVGMean");
+            }
+        }
 
         public Uri IconSource
         {

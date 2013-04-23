@@ -6,8 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300"
-    d:DesignWidth="400" LayoutUpdated="UserControl_LayoutUpdated_1">
+    d:DesignHeight="300" LayoutUpdated="UserControl_LayoutUpdated_1" Width="Auto">
 	<UserControl.Resources>
 		<Storyboard x:Name="Triggered">
 			<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)" Storyboard.TargetName="GroupImage">
@@ -38,30 +37,35 @@
 				</EasingDoubleKeyFrame>
 				<DiscreteDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
 			</DoubleAnimationUsingKeyFrames>
-		</Storyboard>
-	</UserControl.Resources>
+        </Storyboard>
+        <local:StringFormatConverter x:Key="StringFormatConverter" />
+    </UserControl.Resources>
     
     <Grid>
-    	<StackPanel Orientation="Horizontal">
-
-            <Image x:Name="GroupImage" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding IconSource}" Margin="0,0,5,0" RenderTransformOrigin="0.5,0.5">
-            	<Image.RenderTransform>
-            		<CompositeTransform/>
-            	</Image.RenderTransform>
-            </Image>
-        
-    		<StackPanel VerticalAlignment="Top">
-    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name"/>
-    			<Grid>
-    				<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
-    				<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
-    			</Grid>
-    			<Grid>
-    				<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Interarrival exp: "/>
-    				<TextBlock x:Name="InterarrivalBox" TextWrapping="Wrap" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16"/>
-    			</Grid>
-    		</StackPanel>
-
-    	</StackPanel>
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition Width="Auto"/>
+    		<ColumnDefinition/>
+    	</Grid.ColumnDefinitions>
+    	<Image x:Name="GroupImage" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding IconSource}" RenderTransformOrigin="0.5,0.5" Margin="0,0,5,0">
+    		<Image.RenderTransform>
+    			<CompositeTransform/>
+    		</Image.RenderTransform>
+    	</Image>
+    	<Grid Grid.Column="1">
+    		<Grid.RowDefinitions>
+    			<RowDefinition Height="Auto"/>
+    			<RowDefinition Height="Auto"/>
+    			<RowDefinition Height="Auto"/>
+    		</Grid.RowDefinitions>
+    		<Grid.ColumnDefinitions>
+    			<ColumnDefinition Width="Auto"/>
+    			<ColumnDefinition/>
+    		</Grid.ColumnDefinitions>
+    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
+    		<TextBlock x:Name="CooldownBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: " Grid.Row="1" Margin="0,0,10,0"/>
+    		<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" Text="Interarrival exp: " VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Row="2" Margin="0,0,10,0"/>
+    		<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" VerticalAlignment="Top" Grid.Column="1" Grid.Row="1" TextAlignment="Right" MinWidth="70"/>
+    		<TextBlock x:Name="InterarrivalBox" TextWrapping="Wrap" Text="{Binding InterarrivalERVGMean, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" VerticalAlignment="Top" Grid.Column="1" Grid.Row="2" TextAlignment="Right" MinWidth="70"/>
+    	</Grid>
     </Grid>
 </UserControl>

@@ -103,6 +103,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="ExitNodeData.cs" />
     <Compile Include="ExitNode.xaml.cs">

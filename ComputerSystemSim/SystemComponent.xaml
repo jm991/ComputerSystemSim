@@ -11,13 +11,19 @@
 	<UserControl.Resources>
 		<DataTemplate x:Key="EventsTemplate">
 			<Grid>
-				<StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-					<Image Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="70" Source="{Binding CreatorImageURI}"/>
-					<StackPanel Margin="0,0,0,5" Orientation="Vertical">
-						<TextBlock Text="{Binding JobTitle}"/>
-						<TextBlock Text="{Binding ArrivalTime}"/>
-					</StackPanel>
-				</StackPanel>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+				<Image HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Height="70" Source="{Binding CreatorImageURI}" Margin="0,0,5,0"/>
+				<Grid Grid.Column="1">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<TextBlock Text="{Binding JobTitle}" MinWidth="60"/>
+					<TextBlock Text="{Binding ArrivalTime}" Grid.Row="1" MinWidth="60"/>
+				</Grid>
 			</Grid>
 		</DataTemplate>
 		<Storyboard x:Name="Triggered">
@@ -40,9 +46,15 @@
 				<DiscreteDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
 			</DoubleAnimationUsingKeyFrames>
 		</Storyboard>
+        <local:StringFormatConverter x:Key="StringFormatConverter" />
 	</UserControl.Resources>
     
     <Grid>
+    	<Grid.RowDefinitions>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition/>
+    	</Grid.RowDefinitions>
     	<VisualStateManager.VisualStateGroups>
     		<VisualStateGroup x:Name="VisualStateGroup">
     			<VisualStateGroup.Transitions>
@@ -54,55 +66,63 @@
     			</VisualStateGroup.Transitions>
     		</VisualStateGroup>
     	</VisualStateManager.VisualStateGroups>
-    	<StackPanel>
-    		<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0">
-    			<Canvas Height="70" Width="60" Margin="0,0,5,0">
-    				<Image x:Name="GroupImage" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding IconSource}" RenderTransformOrigin="0.5,0.5">
-    					<Image.Projection>
-    						<PlaneProjection/>
-    					</Image.Projection>
-    					<Image.RenderTransform>
-    						<CompositeTransform/>
-    					</Image.RenderTransform>
-    				</Image>
-    				<Image x:Name="GroupImage_Copy" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding Source, ElementName=GroupImage}" RenderTransformOrigin="0.5,0.5">
-    					<Image.Projection>
-    						<PlaneProjection/>
-    					</Image.Projection>
-    					<Image.RenderTransform>
-    						<CompositeTransform/>
-    					</Image.RenderTransform>
-    				</Image>
-    			</Canvas>
-    			<StackPanel VerticalAlignment="Top">
-    				<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="System Component Name"/>
-    				<Grid>
-    					<TextBlock x:Name="CooldownTicksBox_Copy" TextWrapping="Wrap" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: "/>
-    					<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurProcessCooldown}" Margin="120,0,0,0" FontWeight="Bold" FontSize="16"/>
-    				</Grid>
-    				<Grid>
-    					<TextBlock x:Name="ProcessBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
-    						<Run Text="Process "/>
-    						<Run Text="exp: "/>
-    					</TextBlock>
-    					<TextBlock x:Name="ProcessBox" Text="0" Margin="79,0,0,0" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" TextTrimming="WordEllipsis"/>
-    				</Grid>
-    			</StackPanel>
-    		</StackPanel>
-    		<StackPanel Orientation="Horizontal">
-    			<TextBlock x:Name="QueueBox" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Jobs in queue: " Margin="0"/>
-    			<TextBlock x:Name="NumJobs" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding NumJobs}" Margin="10,0,0,0"/>
-    		</StackPanel>
+    	<Grid Margin="0,0,0,10">
+    		<Grid.ColumnDefinitions>
+    			<ColumnDefinition Width="Auto"/>
+    			<ColumnDefinition/>
+    		</Grid.ColumnDefinitions>
+    		<Canvas Width="{Binding ActualWidth, ElementName=GroupImage}" Height="{Binding ActualHeight, ElementName=GroupImage}" Margin="0,0,5,0">
+    			<Image x:Name="GroupImage" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding IconSource}" RenderTransformOrigin="0.5,0.5">
+    				<Image.Projection>
+    					<PlaneProjection/>
+    				</Image.Projection>
+    				<Image.RenderTransform>
+    					<CompositeTransform/>
+    				</Image.RenderTransform>
+    			</Image>
+    			<Image x:Name="GroupImage_Copy" Height="70" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding Source, ElementName=GroupImage}" RenderTransformOrigin="0.5,0.5">
+    				<Image.Projection>
+    					<PlaneProjection/>
+    				</Image.Projection>
+    				<Image.RenderTransform>
+    					<CompositeTransform/>
+    				</Image.RenderTransform>
+    			</Image>
+    		</Canvas>
+    		<Grid Grid.Column="1">
+    			<Grid.RowDefinitions>
+    				<RowDefinition Height="Auto"/>
+    				<RowDefinition Height="Auto"/>
+    				<RowDefinition Height="Auto"/>
+    			</Grid.RowDefinitions>
+    			<Grid.ColumnDefinitions>
+    				<ColumnDefinition Width="Auto"/>
+    				<ColumnDefinition/>
+    			</Grid.ColumnDefinitions>
+    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="System Component Name" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
+    			<TextBlock x:Name="CooldownBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: " Grid.Row="1" Margin="0,0,10,0"/>
+    			<TextBlock x:Name="ProcessBlock" TextWrapping="Wrap" Text="Process exp: " Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
+    			<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" Padding="0" Grid.Row="1" VerticalAlignment="Top" Grid.Column="1" MinWidth="56" TextAlignment="Right"/>
+    			<TextBlock x:Name="ProcessBox" TextWrapping="Wrap" Text="{Binding ProcessMean, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" Padding="0" Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" MinWidth="56" TextAlignment="Right"/>
+    		</Grid>
+    	</Grid>
+    	<Grid Grid.Row="1">
+    		<Grid.ColumnDefinitions>
+    			<ColumnDefinition Width="Auto"/>
+    			<ColumnDefinition/>
+    		</Grid.ColumnDefinitions>
+    		<TextBlock x:Name="QueueBox" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Jobs in queue: " Margin="0"/>
+    		<TextBlock x:Name="NumJobs" TextWrapping="Wrap" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding NumJobs}" Grid.Column="1" Padding="150,0,0,0" TextAlignment="Right"/>
+    	</Grid>
 
-    		<ScrollViewer Height="230">
-    			<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}" LayoutUpdated="EventsListBox_LayoutUpdated" IsHitTestVisible="False">
-					<ListBox.ItemContainerTransitions>
-						<TransitionCollection>
-							<RepositionThemeTransition/>
-						</TransitionCollection>
-					</ListBox.ItemContainerTransitions>
-				</ListBox>				
-    		</ScrollViewer>
-    	</StackPanel>
+    	<ScrollViewer Grid.Row="2" Margin="0">
+    		<ListBox x:Name="EventsListBox" Margin="0" ItemTemplate="{StaticResource EventsTemplate}" ItemsSource="{Binding JobQueue}" LayoutUpdated="EventsListBox_LayoutUpdated" IsHitTestVisible="False">
+    			<ListBox.ItemContainerTransitions>
+    				<TransitionCollection>
+    					<RepositionThemeTransition/>
+    				</TransitionCollection>
+    			</ListBox.ItemContainerTransitions>
+    		</ListBox>				
+    	</ScrollViewer>
     </Grid>
 </UserControl>
