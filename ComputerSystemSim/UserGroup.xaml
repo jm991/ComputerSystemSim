@@ -61,7 +61,7 @@
     			<ColumnDefinition Width="Auto"/>
     			<ColumnDefinition/>
     		</Grid.ColumnDefinitions>
-    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
+    		<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="User Control Name" Margin="0,0,10,0" Grid.ColumnSpan="2" Style="{StaticResource SubheaderTextStyle}"/>
     		<TextBlock x:Name="CooldownBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: " Grid.Row="1" Margin="0,0,10,0"/>
     		<TextBlock x:Name="InterarrivalBlock" TextWrapping="Wrap" Text="Interarrival exp: " VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Row="2" Margin="0,0,10,0"/>
     		<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" VerticalAlignment="Top" Grid.Column="1" Grid.Row="1" TextAlignment="Right" MinWidth="70"/>

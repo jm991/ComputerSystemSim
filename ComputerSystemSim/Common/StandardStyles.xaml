@@ -99,9 +99,10 @@
         <Setter Property="LineHeight" Value="30"/>
         <Setter Property="RenderTransform">
             <Setter.Value>
-                <TranslateTransform X="-1" Y="6"/>
-            </Setter.Value>
+        		<CompositeTransform/>
+        	</Setter.Value>
         </Setter>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
     </Style>
 
     <Style x:Key="TitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaselineTextStyle}">

@@ -143,9 +143,9 @@ namespace ComputerSystemSim
 
         private string GenerateId()
         {
-            MainPage.JobNumber++;
+            SimulationPage.JobNumber++;
 
-            return "" + MainPage.JobNumber;
+            return "" + SimulationPage.JobNumber;
         }
 
         #endregion

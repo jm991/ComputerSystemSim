@@ -87,11 +87,6 @@ namespace ComputerSystemSim
 
         #region Methods
 
-        public void Update()
-        {
-            CompletedJobs = jobQueue.Count;
-        }
-
         #endregion
     }
 }

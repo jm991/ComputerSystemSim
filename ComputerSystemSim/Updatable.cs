@@ -14,7 +14,5 @@ namespace ComputerSystemSim
         Job.EventTypes EventType { get; }
 
         Uri IconSource { get; }
-
-        void Update();
     }
 }

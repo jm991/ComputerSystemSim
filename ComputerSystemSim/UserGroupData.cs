@@ -121,30 +121,12 @@ namespace ComputerSystemSim
 
         #region Methods
 
-        public Job GenerateArrival()
-        {
-            CurEventCooldown = PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);
-            Job newJob = new Job(CurEventCooldown + MainPage.SimClockTicksStatic, this, MainPage.SimClockTicksStatic);
-
-            return newJob;
-        }
-
         public Job GenerateArrival(double simulationClock)
         {
             CurEventCooldown = PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);
             Job newJob = new Job(CurEventCooldown + simulationClock, this, simulationClock);
 
             return newJob;
-        }
-
-        public void Update()
-        {
-            CurEventCooldown -= 1;
-
-            if (CurEventCooldown <= 0 && goal is SystemComponentData)
-            {
-                (goal as SystemComponentData).JobQueue.Add(GenerateArrival());
-            }
         }
 
         #endregion

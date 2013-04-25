@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,16 +20,69 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
+// The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
 
 namespace ComputerSystemSim
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// Some fields are static to emulate Singleton behaviour (i.e., accessible statically from any other class in the simulation).
-    /// </summary>
-    public sealed partial class MainPage : Page, INotifyPropertyChanged
+    public class Output
     {
+        private double macUtil;
+        private double nextUtil;
+        private double printerUtil;
+        private double w;
+        private double l;
+
+        public double MacUtil { get { return macUtil; } }
+        public double NextUtil { get { return nextUtil; } }
+        public double PrinterUtil { get { return printerUtil; } }
+        public double W { get { return w; } }
+        public double L { get { return l; } }
+
+        public Output(double macUtil, double nextUtil, double printerUtil, double w, double l)
+        {
+            this.macUtil = macUtil;
+            this.nextUtil = nextUtil;
+            this.printerUtil = printerUtil;
+            this.w = w;
+            this.l = l;
+        }
+    }
+
+    /// <summary>
+    /// A basic page that provides characteristics common to most applications.
+    /// </summary>
+    public sealed partial class SimulationPage : ComputerSystemSim.Common.LayoutAwarePage, INotifyPropertyChanged
+    {
+        /// <summary>
+        /// Populates the page with content passed during navigation.  Any saved state is also
+        /// provided when recreating a page from a prior session.
+        /// </summary>
+        /// <param name="navigationParameter">The parameter value passed to
+        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested.
+        /// </param>
+        /// <param name="pageState">A dictionary of state preserved by this page during an earlier
+        /// session.  This will be null the first time a page is visited.</param>
+        protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
+        {
+            if (navigationParameter is Input)
+            {
+                totalJobs = (navigationParameter as Input).TotalJobs;
+                warmupJobs = (navigationParameter as Input).WarmupJobs;
+                trials = (navigationParameter as Input).Trials;
+            }
+        }
+
+        /// <summary>
+        /// Preserves state associated with this page in case the application is suspended or the
+        /// page is discarded from the navigation cache.  Values must conform to the serialization
+        /// requirements of <see cref="SuspensionManager.SessionState"/>.
+        /// </summary>
+        /// <param name="pageState">An empty dictionary to be populated with serializable state.</param>
+        protected override void SaveState(Dictionary<String, Object> pageState)
+        {
+        }
+
+
         #region Structs
         
         private struct WarmUpValues
@@ -69,9 +123,9 @@ namespace ComputerSystemSim
 
         #region Variables (private)
 
-        private const int TOTAL_JOBS = 10000;
-        private const int WARMUP_JOBS = 1000;
-        private const int TRIALS = 30;
+        private int totalJobs = 10000;
+        private int warmupJobs = 1000;
+        private int trials = 30;
         private const int MAX_PRINTER_JOBS = 10;
         private const int MILLI_PER_SEC = 1000;
 
@@ -83,7 +137,7 @@ namespace ComputerSystemSim
         private int jobsDone = 0;
         private int printerJobs = 0;
         private double totalJobsInSystemArea = 0;
-        private int prevJobsInSystemArea = 0;
+        private int prevJobsInSystem = 0;
         private double prevJobsTime = 0;
 
         private DispatcherTimer timer;
@@ -91,8 +145,9 @@ namespace ComputerSystemSim
         private bool animating = true;
         private bool initialized = false;
 
-        // TODO: move animation onto the same system as the full simulation
-        private static int simClockTicks = 0;
+        private int jobsInSystem = 0;
+
+        private ObservableCollection<Output> outputs;
 
         #endregion
 
@@ -117,24 +172,19 @@ namespace ComputerSystemSim
 
         public static int JobNumber { get; set; }
 
-        public static int SimClockTicksStatic
-        {
-            get
-            {
-                return simClockTicks;
-            }
-        }
-
-        public int SimClockTicks
+        public double SimClock
         {
             get 
             { 
-                return simClockTicks; 
+                return simClock; 
             }
             set
             {
-                simClockTicks = value;
-                OnPropertyChanged("SimClockTicks");
+                simClock = value;
+                if (animating)
+                {
+                    OnPropertyChanged("SimClock");
+                }
             }
         }
 
@@ -142,7 +192,7 @@ namespace ComputerSystemSim
         {
             get
             {
-                return completedJobs >= (WARMUP_JOBS + TOTAL_JOBS);
+                return completedJobs >= (warmupJobs + totalJobs);
             }
         }
 
@@ -150,10 +200,12 @@ namespace ComputerSystemSim
 
 
         #region Constructors
-
-        public MainPage()
+        
+        public SimulationPage()
         {
-            this.InitializeComponent();
+            this.InitializeComponent(); 
+            
+            outputs = new ObservableCollection<Output>();
 
             warmUpValues = new WarmUpValues();
             warmUpValues.Init();
@@ -170,16 +222,6 @@ namespace ComputerSystemSim
         #endregion
 
         #region Event handlers
-
-        private void TextBox_TextChanged_1(object sender, Windows.UI.Xaml.Controls.TextChangedEventArgs e)
-        {
-            if (sender is TextBox)
-            {
-                TextBox senderBox = sender as TextBox;
-
-                senderBox.Text = Regex.Replace(senderBox.Text, @"[^0-9]*", string.Empty, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-            }
-        }
 
         private void SpeedSlider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         {
@@ -243,6 +285,7 @@ namespace ComputerSystemSim
 
         private async void FullSimBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            JobIcon.Visibility = Visibility.Collapsed;
             animating = false;
             ProgressBar.IsIndeterminate = true;
 
@@ -252,11 +295,11 @@ namespace ComputerSystemSim
             // Update the UI with results
             ProgressBar.IsIndeterminate = false;
             RandBox.Text =
-                    "Mac util time: " + (1 - ((Mac.Data.TotalTimeIdle - warmUpValues.MacPostWarmup) / (simClock - warmUpValues.SimClockPostWarmup)))
-                + "\nNeXT util time: " + (1 - ((NeXT.Data.TotalTimeIdle - warmUpValues.NeXTPostWarmup) / (simClock - warmUpValues.SimClockPostWarmup)))
-                + "\nPrinter util time: " + (1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / (simClock - warmUpValues.SimClockPostWarmup)))
-                + "\nW Avg time per job: " + (totalJobTime / TOTAL_JOBS) + " for " + jobsDone + " jobs"
-                + "\nL Avg jobs in system: " + (totalJobsInSystemArea / (simClock - warmUpValues.SimClockPostWarmup));
+                    "Mac util time: " + (1 - ((Mac.Data.TotalTimeIdle - warmUpValues.MacPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
+                + "\nNeXT util time: " + (1 - ((NeXT.Data.TotalTimeIdle - warmUpValues.NeXTPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
+                + "\nPrinter util time: " + (1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
+                + "\nW Avg time per job: " + (totalJobTime / totalJobs) + " for " + jobsDone + " jobs"
+                + "\nL Avg jobs in system: " + (totalJobsInSystemArea / (SimClock - warmUpValues.SimClockPostWarmup));
 
             SimInitBtn.IsEnabled = true;
         }
@@ -265,45 +308,6 @@ namespace ComputerSystemSim
 
 
         #region Methods
-
-        private void InitializeSimulation()
-        {
-            simClock = 0;
-            completedJobs = 0;
-            jobQueue = new PriorityQueue<double, Job>();
-            jobsDone = 0;
-            warmUpValues.Set(false, 0, 0, 0, 0);
-            totalJobTime = 0;
-            printerJobs = 0;
-            totalJobsInSystemArea = 0;
-            prevJobsInSystemArea = 0;
-            prevJobsTime = 0;
-            Mac.Data.TotalTimeIdle = 0;
-            Mac.Data.TimeIdleAgain = 0;
-            Mac.Data.JobQueue.Clear();
-            Mac.Data.NumJobs = 0;
-            NeXT.Data.TotalTimeIdle = 0;
-            NeXT.Data.TimeIdleAgain = 0;
-            NeXT.Data.JobQueue.Clear();
-            NeXT.Data.NumJobs = 0;
-            Printer.Data.TotalTimeIdle = 0;
-            Printer.Data.TimeIdleAgain = 0;
-            Printer.Data.JobQueue.Clear();
-            Printer.Data.NumJobs = 0;
-            ExitSystem.Data.JobQueue.Clear();
-            ExitSystem.Data.CompletedJobs = 0;
-            ResetTimers();
-
-            // Initializations
-            Job uG1Job = UserGroup1.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG1Job.ArrivalTime, uG1Job));
-            Job uG2Job = UserGroup2.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG2Job.ArrivalTime, uG2Job));
-            Job uG3Job = UserGroup3.Data.GenerateArrival(simClock);
-            jobQueue.Add(new KeyValuePair<double, Job>(uG3Job.ArrivalTime, uG3Job));
-
-            initialized = true;
-        }
 
         private void ResetTimers()
         {
@@ -322,18 +326,62 @@ namespace ComputerSystemSim
             timerProg.Start();
         }
 
+        private void InitializeSimulation()
+        {
+            JobIcon.Opacity = 1;
+            JobIcon.Visibility = Visibility.Visible;
+            SimClock = 0;
+            completedJobs = 0;
+            jobQueue = new PriorityQueue<double, Job>();
+            jobsDone = 0;
+            warmUpValues.Set(false, 0, 0, 0, 0);
+            totalJobTime = 0;
+            printerJobs = 0;
+            totalJobsInSystemArea = 0;
+            prevJobsInSystem = 0;
+            prevJobsTime = 0;
+            Mac.Data.TotalTimeIdle = 0;
+            Mac.Data.TimeIdleAgain = 0;
+            Mac.Data.JobQueue.Clear();
+            Mac.Data.NumJobs = 0;
+            NeXT.Data.TotalTimeIdle = 0;
+            NeXT.Data.TimeIdleAgain = 0;
+            NeXT.Data.JobQueue.Clear();
+            NeXT.Data.NumJobs = 0;
+            Printer.Data.TotalTimeIdle = 0;
+            Printer.Data.TimeIdleAgain = 0;
+            Printer.Data.JobQueue.Clear();
+            Printer.Data.NumJobs = 0;
+            ExitSystem.Data.JobQueue.Clear();
+            ExitSystem.Data.CompletedJobs = 0;
+            ResetTimers();
+
+            // Initializations
+            Job uG1Job = UserGroup1.Data.GenerateArrival(SimClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG1Job.ArrivalTime, uG1Job));
+            Job uG2Job = UserGroup2.Data.GenerateArrival(SimClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG2Job.ArrivalTime, uG2Job));
+            Job uG3Job = UserGroup3.Data.GenerateArrival(SimClock);
+            jobQueue.Add(new KeyValuePair<double, Job>(uG3Job.ArrivalTime, uG3Job));
+
+            initialized = true;
+        }
+
         private async void ComputeSimulationEvent()
         {
             // Pop next event
             KeyValuePair<double, Job> curJob = jobQueue.Dequeue();
 
             // Advance simulation clock
-            simClock = curJob.Value.ArrivalTime;
+            SimClock = curJob.Value.ArrivalTime;
 
             // Set necessary variables once warm up period finished
-            if (completedJobs == WARMUP_JOBS && !warmUpValues.SetPostWarmup)
+            if (completedJobs == warmupJobs && !warmUpValues.SetPostWarmup)
             {
-                warmUpValues.Set(true, simClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
+                warmUpValues.Set(true, SimClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
+
+                prevJobsInSystem = jobQueue.Count;
+                prevJobsTime = SimClock;
             }
 
             // Execute it and add new events back to eventQueue
@@ -355,14 +403,11 @@ namespace ComputerSystemSim
                         // createJob.Begin();
                     }
                     // Spawn new UserGroup event 
-                    Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(simClock);
+                    Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(SimClock);
                     jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
 
-                    // Contributes to computation of L (average number of jobs in the whole system)
-                    UpdateJobsArea();
-
                     // Send the current job down the system
-                    jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value));
+                    jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value, true));
                     if (animating)
                     {
                         Mac.Data.JobQueue.Add(curJob.Value);
@@ -380,9 +425,12 @@ namespace ComputerSystemSim
                         Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
                         //await triggered.BeginAsync();
                     }
-                    
-                    curJob = SystemComponentJobProcess(NeXT.Data, curJob.Value);
+
+                    curJob = SystemComponentJobProcess(NeXT.Data, curJob.Value, false);
                     jobQueue.Add(curJob);
+
+                    // Contributes to computation of L (average number of jobs in the whole system) once Job enters first component of systems
+                    UpdateJobsArea();
 
                     if (animating)
                     {
@@ -404,7 +452,7 @@ namespace ComputerSystemSim
 
                     if (printerJobs < MAX_PRINTER_JOBS)
                     {
-                        curJob = SystemComponentJobProcess(Printer.Data, curJob.Value);
+                        curJob = SystemComponentJobProcess(Printer.Data, curJob.Value, false);
                         jobQueue.Add(curJob);
                         printerJobs++;
                         if (animating)
@@ -467,13 +515,13 @@ namespace ComputerSystemSim
 
         private void UpdateJobsArea()
         {
-            if (completedJobs > WARMUP_JOBS)
+            if (completedJobs > warmupJobs)
             {
-                double area = prevJobsInSystemArea * (simClock - prevJobsTime);
+                double area = prevJobsInSystem * (SimClock - prevJobsTime);
                 totalJobsInSystemArea += area;
                 
-                prevJobsInSystemArea = jobQueue.Count;
-                prevJobsTime = simClock;
+                prevJobsInSystem = jobsInSystem;
+                prevJobsTime = SimClock;
             }
         }
 
@@ -485,10 +533,11 @@ namespace ComputerSystemSim
         private void JobExitSystem(KeyValuePair<double, Job> curJob, bool includeInMetrics)
         {
             completedJobs++;
+            jobsInSystem--;
 
-            if (completedJobs > WARMUP_JOBS && includeInMetrics)
+            if (completedJobs > warmupJobs && includeInMetrics)
             {
-                curJob.Value.SystemExitTime = simClock;
+                curJob.Value.SystemExitTime = SimClock;
 
                 totalJobTime += (curJob.Value.SystemExitTime - curJob.Value.SystemEntryTime);
 
@@ -499,17 +548,23 @@ namespace ComputerSystemSim
             UpdateJobsArea();
         }
 
-        private KeyValuePair<double, Job> SystemComponentJobProcess(SystemComponentData component, Job job)
+        private KeyValuePair<double, Job> SystemComponentJobProcess(SystemComponentData component, Job job, bool isMac)
         {
+            if (isMac)
+            {
+                job.SystemEntryTime = SimClock;
+                jobsInSystem++;
+            }
+
             // BUSY
-            if (simClock < component.TimeIdleAgain)
+            if (SimClock < component.TimeIdleAgain)
             {
                 job.ArrivalTime = component.TimeIdleAgain + PseudoRandomGenerator.ExponentialRVG(component.ProcessMean);
             }
             // IDLE
             else
             {
-                component.TotalTimeIdle += (simClock - component.TimeIdleAgain);
+                component.TotalTimeIdle += (SimClock - component.TimeIdleAgain);
                 job.ArrivalTime += PseudoRandomGenerator.ExponentialRVG(component.ProcessMean);
             }
 
@@ -540,14 +595,14 @@ namespace ComputerSystemSim
             animationX.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = to.X, EasingFunction = easingFunction });
             animationY.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = from.Y });
             animationY.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = to.Y, EasingFunction = easingFunction });
-            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = 100 });
-            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds((MILLI_PER_SEC / 2) - (MILLI_PER_SEC / 10)), Value = 100 });
+            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.Zero, Value = 1 });
+            opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds((MILLI_PER_SEC / 2) - (MILLI_PER_SEC / 5)), Value = 1 });
             opacity.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(MILLI_PER_SEC / 2), Value = 0, EasingFunction = easingFunction });
 
             // Notice the first parameter takes a timeline object not the storyboard itself
             Storyboard.SetTargetProperty(animationX, "(UIElement.RenderTransform).(CompositeTransform.TranslateX)");
             Storyboard.SetTargetProperty(animationY, "(UIElement.RenderTransform).(CompositeTransform.TranslateY)");
-            Storyboard.SetTargetProperty(opacity, "UIElement.Opacity");
+            Storyboard.SetTargetProperty(opacity, "(UIElement.Opacity)");
             Storyboard.SetTarget(animationX, JobIcon);
             Storyboard.SetTarget(animationY, JobIcon);
             Storyboard.SetTarget(opacity, JobIcon);

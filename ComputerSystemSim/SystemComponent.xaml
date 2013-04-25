@@ -99,11 +99,11 @@
     				<ColumnDefinition Width="Auto"/>
     				<ColumnDefinition/>
     			</Grid.ColumnDefinitions>
-    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="System Component Name" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
     			<TextBlock x:Name="CooldownBlock" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ticks till cooldown: " Grid.Row="1" Margin="0,0,10,0"/>
     			<TextBlock x:Name="ProcessBlock" TextWrapping="Wrap" Text="Process exp: " Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"/>
     			<TextBlock x:Name="CooldownTicksBox" TextWrapping="Wrap" Text="{Binding CurEventCooldown, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" Padding="0" Grid.Row="1" VerticalAlignment="Top" Grid.Column="1" MinWidth="56" TextAlignment="Right"/>
     			<TextBlock x:Name="ProcessBox" TextWrapping="Wrap" Text="{Binding ProcessMean, ConverterParameter=\{0:N\}, Converter={StaticResource StringFormatConverter}}" FontWeight="Bold" FontSize="16" Padding="0" Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" MinWidth="56" TextAlignment="Right"/>
+    			<TextBlock x:Name="NameBox" TextWrapping="Wrap" Text="System Component Name" HorizontalAlignment="Left" VerticalAlignment="Bottom" Style="{StaticResource SubheaderTextStyle}" Grid.ColumnSpan="2"/>
     		</Grid>
     	</Grid>
     	<Grid Grid.Row="1">
