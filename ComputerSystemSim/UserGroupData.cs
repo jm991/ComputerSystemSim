@@ -8,18 +8,36 @@ using Windows.UI;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// Model data for the UserGroup View.
+    /// </summary>
     public class UserGroupData : Updatable, INotifyPropertyChanged
     {
         #region Variables (private)
 
+        /// <summary>
+        /// TODO: remove this coupling; bad design choice
+        /// </summary>
         private UserGroup view;
 
+        /// <summary>
+        /// Cooldown based on sim clock till next event fire
+        /// </summary>
         private double curEventCooldown = 0;
-        
+
+        /// <summary>
+        /// Next item in system that this component feeds to
+        /// </summary>
         private Updatable goal;
 
+        /// <summary>
+        /// Representative color of this group in UI
+        /// </summary>
         private Color groupColor = Color.FromArgb(0, 0, 0, 0);
 
+        /// <summary>
+        /// Interarrival mean used in random number generation
+        /// </summary>
         private double interarrivalERVGMean = 0;
         
         #endregion
@@ -111,6 +129,10 @@ namespace ComputerSystemSim
 
         #region Constructors
 
+        /// <summary>
+        /// Instantiates a new Model
+        /// </summary>
+        /// <param name="view">TODO remove this view coupling</param>
         public UserGroupData(UserGroup view)
         {
             this.view = view;
@@ -121,6 +143,11 @@ namespace ComputerSystemSim
 
         #region Methods
 
+        /// <summary>
+        /// Generates a new event based on this UserGroups random interarrival mean.
+        /// </summary>
+        /// <param name="simulationClock">Simulation clock for offsetting time to enter system</param>
+        /// <returns></returns>
         public Job GenerateArrival(double simulationClock)
         {
             CurEventCooldown = PseudoRandomGenerator.ExponentialRVG(view.InterarrivalERVGMean);

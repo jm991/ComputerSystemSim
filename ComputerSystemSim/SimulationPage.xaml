@@ -148,8 +148,10 @@
         			<Slider x:Name="SpeedSlider" Maximum="50" Minimum="-5" Value="1" ValueChanged="SpeedSlider_ValueChanged" ThumbToolTipValueConverter="{StaticResource NegativeToFractionalConverter}"/>
         			<ToggleSwitch x:Name="SystemSwitch" Header="Status" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="Paused" OnContent="Running"/>
         			<TextBlock x:Name="TickBlock" TextWrapping="Wrap" Text="{Binding SimClock}"/>
-        			<Button x:Name="FullSimBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click" ToolTipService.ToolTip="Complete trial"/>
-        			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch"/>
+        			<Button x:Name="FullSimBtn" Content="Run Trial" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="FullSimBtn_Click" ToolTipService.ToolTip="Complete trial"/>
+        			<ProgressBar x:Name="ProgressBar" VerticalAlignment="Stretch" Margin="0,0,0,10"/>
+        			<Button x:Name="RunTrialsBtn" Content="Run Simulation" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RunTrialsBtn_Click" ToolTipService.ToolTip="Complete trial"/>
+        			<ProgressBar x:Name="RunTrialsProgressBar" VerticalAlignment="Stretch"/>
         		</StackPanel>
         		<Grid Grid.Column="2" Grid.RowSpan="2">
         			<Grid.RowDefinitions>

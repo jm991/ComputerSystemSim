@@ -17,29 +17,68 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// Data class to hold simulation properties set by the user.
+    /// </summary>
     public class Input
     {
+        #region Variables (private)
+
+        /// <summary>
+        /// Jobs to count after warmup period
+        /// </summary>
         private int totalJobs;
+
+        /// <summary>
+        /// Number of jobs in warmup period
+        /// </summary>
         private int warmupJobs;
+
+        /// <summary>
+        /// Number of simulation trials to run
+        /// </summary>
         private int trials;
+
+        #endregion
+
+
+        #region Properties (public)
 
         public int TotalJobs { get { return totalJobs; } }
         public int WarmupJobs { get { return warmupJobs; } }
         public int Trials { get { return trials; } }
 
+        #endregion
+
+
+        #region Constructors
+
+        /// <summary>
+        /// Instantiate a new Input with given params.
+        /// </summary>
+        /// <param name="totalJobs">Input for totalJobs</param>
+        /// <param name="warmupJobs">Input for warmupJobs</param>
+        /// <param name="trials">Input for trials</param>
         public Input(int totalJobs, int warmupJobs, int trials)
         {
             this.totalJobs = totalJobs;
             this.warmupJobs = warmupJobs;
             this.trials = trials;
         }
+
+        #endregion
     }
 
     /// <summary>
+    /// Landing page of application; lets user set simulation variables via textboxes.
+    /// Serves as both ViewModel/Model since there is no data to store in this page.
+    /// 
     /// A basic page that provides characteristics common to most applications.
     /// </summary>
     public sealed partial class InputPage : ComputerSystemSim.Common.LayoutAwarePage
     {
+        #region Properties (public)
+
         public int TotalJobs
         {
             get
@@ -85,11 +124,36 @@ namespace ComputerSystemSim
             }
         }
 
+        #endregion
+
+
+        #region Constructors
+
+        public InputPage()
+        {
+            this.InitializeComponent();
+        }
+
+        #endregion
+
+
+        #region Event Handlers
+
+        /// <summary>
+        /// When user clicks OK, navigate to simulation and pass along input params.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OkBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(SimulationPage), new Input(TotalJobs, WarmupJobs, Trials));
         }
 
+        /// <summary>
+        /// Use this handler on textboxes that only can accept numeric input.
+        /// </summary>
+        /// <param name="sender">TextBox to restrict input on</param>
+        /// <param name="e"></param>
         private void TextBox_TextChanged_1(object sender, Windows.UI.Xaml.Controls.TextChangedEventArgs e)
         {
             if (sender is TextBox)
@@ -98,11 +162,6 @@ namespace ComputerSystemSim
 
                 senderBox.Text = Regex.Replace(senderBox.Text, @"[^0-9]*", string.Empty, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
             }
-        }
-
-        public InputPage()
-        {
-            this.InitializeComponent();
         }
 
         /// <summary>
@@ -127,5 +186,7 @@ namespace ComputerSystemSim
         protected override void SaveState(Dictionary<String, Object> pageState)
         {
         }
+
+        #endregion
     }
 }

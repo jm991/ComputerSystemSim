@@ -21,10 +21,17 @@ using Windows.UI;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// ViewModel code behind for UserGroup View.
+    /// UserGroup is a visual representation of an entity that creates Jobs.
+    /// </summary>
     public sealed partial class UserGroup : UserControl, INotifyPropertyChanged
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Model data for UserGroup
+        /// </summary>
         private UserGroupData data;
 
         #endregion
@@ -159,18 +166,6 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
-        private void UserControl_LayoutUpdated_1(object sender, object e)
-        {
-            try
-            {
-                Data.Goal = Goal;
-            }
-            catch (InvalidCastException castE)
-            {
-                // Ignore; this happens because I'm waiting for the dependency property to register
-            }
-        }
-
         private static void OnGroupColorChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             (source as UserGroup).Data.GroupColor = (Color)e.NewValue;
@@ -194,15 +189,17 @@ namespace ComputerSystemSim
         private static void OnInterarrivalChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             double interarrival = (double)e.NewValue;
-            // (source as UserGroup).InterarrivalBox.Text = "" + e.NewValue;
             (source as UserGroup).Data.InterarrivalERVGMean = interarrival;
         }
 
         #endregion
 
 
-        #region Constructors 
+        #region Constructors        
 
+        /// <summary>
+        /// Initializes the ViewModel, setting the Model data.
+        /// </summary>
         public UserGroup()
         {
             this.InitializeComponent();

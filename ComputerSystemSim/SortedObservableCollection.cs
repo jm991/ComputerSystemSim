@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace ComputerSystemSim
 {
     /// <summary>
-    /// SortedCollectioncan be used
+    /// SortedCollection can be used
     /// in WPF applications as the source of the binding.
     /// </summary>
     public class SortedObservableCollection<T> : ObservableCollection<T>

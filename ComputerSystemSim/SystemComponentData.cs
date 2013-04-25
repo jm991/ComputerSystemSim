@@ -9,30 +9,56 @@ using Windows.UI.Xaml;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// Model data for the SystemComponent View.
+    /// </summary>
     public class SystemComponentData : INotifyPropertyChanged, Updatable
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Jobs in the Component's queue; for UI only
+        /// </summary>
         private SortedObservableCollection<Job> jobQueue;
 
-        private State curState = State.IDLE;
-
+        /// <summary>
+        /// Cooldown based on sim clock
+        /// </summary>
         private double curProcessCooldown = 0;
 
-        private Job curJob;
-
+        /// <summary>
+        /// Next item in system that this component feeds to
+        /// </summary>
         private Updatable goal;
 
+        /// <summary>
+        /// Next time this component will be idle
+        /// </summary>
         private double timeIdleAgain = 0;
 
+        /// <summary>
+        /// Time spent idle during simulation
+        /// </summary>
         private double totalTimeIdle = 0;
 
+        /// <summary>
+        /// Process mean used in random number generation
+        /// </summary>
         private double processMean = 0;
 
+        /// <summary>
+        /// Image of the component
+        /// </summary>
         private Uri iconSource;
 
+        /// <summary>
+        /// Name of component
+        /// </summary>
         private string name;
 
+        /// <summary>
+        /// Activity is based on what EventType is handled by this component
+        /// </summary>
         private Job.EventTypes eventType;
 
         #endregion
@@ -72,12 +98,6 @@ namespace ComputerSystemSim
             set { timeIdleAgain = value; }
         }
 
-        public State CurState
-        {
-            get { return curState; }
-            set { curState = value; }
-        }
-
         public Updatable Goal
         {
             get { return goal; }
@@ -93,22 +113,6 @@ namespace ComputerSystemSim
                 OnPropertyChanged("CurProcessCooldown");
             }
         }
-
-        public Job CurJob
-        {
-            get { return curJob; }
-            set 
-            {
-                curJob = value;
-                OnPropertyChanged("CurJob");
-            }
-        }
-
-        public enum State
-        {
-            IDLE,
-            IN_USE
-        };
 
         public SortedObservableCollection<Job> JobQueue
         {
@@ -154,6 +158,9 @@ namespace ComputerSystemSim
 
         #region Constructors
 
+        /// <summary>
+        /// Instantiates a new Model
+        /// </summary>
         public SystemComponentData()
         {
             JobQueue = new SortedObservableCollection<Job>(i => i.ArrivalTime);

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ComputerSystemSim
 {
-    // TODO: need to make this abstract class, not interface
+    /// <summary>
+    /// Interface for any time sensitive object in the Simulation
+    /// </summary>
     public interface Updatable
     {
         string Name { get; }

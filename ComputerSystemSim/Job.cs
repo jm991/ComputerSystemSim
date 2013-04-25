@@ -8,15 +8,41 @@ using Windows.UI.Xaml.Controls;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// Model data class that represents a Job in the system.
+    /// </summary>
     public class Job : INotifyPropertyChanged
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Job's identification in system; mostly for UI purposes
+        /// </summary>
         private string uniqueID;
+
+        /// <summary>
+        /// Indicates which SystemComponent the Job is currently being processed by or waiting for
+        /// </summary>
         private Updatable locationInSystem;
+
+        /// <summary>
+        /// UserGroup that created this Job
+        /// </summary>
         private Updatable creator;
+
+        /// <summary>
+        /// Arrival time to <paramref name="locationInSystem"/>
+        /// </summary>
         private double arrivalTime;
+
+        /// <summary>
+        /// Time when job enters into the Mac processing queue
+        /// </summary>
         private double systemEntryTime = 0;
+
+        /// <summary>
+        /// Time that job exited system
+        /// </summary>
         private double systemExitTime = 0;
 
         #endregion
@@ -110,6 +136,12 @@ namespace ComputerSystemSim
 
         #region Constructors 
 
+        /// <summary>
+        /// Instantiate a Job
+        /// </summary>
+        /// <param name="arrivalTime">Next time event will fire for this Job in system</param>
+        /// <param name="creator">UserGroup that spawned this Job</param>
+        /// <param name="entryTime">Entry time into system</param>
         public Job(double arrivalTime, Updatable creator, double entryTime)
         {
             this.systemEntryTime = entryTime;
@@ -141,6 +173,10 @@ namespace ComputerSystemSim
 
         #region Methods
 
+        /// <summary>
+        /// Generate a unique identifier based off a static, incremented value.
+        /// </summary>
+        /// <returns>A unique ID number</returns>
         private string GenerateId()
         {
             SimulationPage.JobNumber++;

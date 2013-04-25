@@ -20,10 +20,18 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// ViewModel code behind for SystemComponent View.
+    /// SystemComponent represents any processing component in the simulation, such as 
+    /// the Mac, NeXTStation, or the LaserJet.
+    /// </summary>
     public sealed partial class SystemComponent : UserControl
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Model data for the SystemComponent
+        /// </summary>
         private SystemComponentData data;
 
         #endregion
@@ -142,24 +150,19 @@ namespace ComputerSystemSim
 
         #region Event handlers
 
+        /// <summary>
+        /// Since EventsListBox isn't HitTestVisible, this handler sets its SelectedItem
+        /// to 0 if it's not empty. The purpose of this is to display which Job is currently
+        /// being processed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void EventsListBox_LayoutUpdated(object sender, object e)
         {
 			if (EventsListBox.Items.Count > 0)
 			{
 				EventsListBox.SelectedIndex = 0;
 			}
-        }
-
-        private void UserControl_LayoutUpdated_1(object sender, object e)
-        {
-            try
-            {
-                Data.Goal = Goal;
-            }
-            catch (InvalidCastException castE)
-            {
-                // Ignore; this happens because I'm waiting for the dependency property to register
-            }
         }
 
         private static void OnGoalChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -189,7 +192,6 @@ namespace ComputerSystemSim
         private static void OnProcessMeanChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             double processMean = (double)e.NewValue;
-            // (source as SystemComponent).ProcessBox.Text = "" + processMean;
             (source as SystemComponent).Data.ProcessMean = processMean;
         }
 
@@ -198,6 +200,9 @@ namespace ComputerSystemSim
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes the ViewModel, setting the Model data.
+        /// </summary>
         public SystemComponent()
         {
             this.InitializeComponent();

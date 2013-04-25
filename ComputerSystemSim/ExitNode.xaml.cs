@@ -16,10 +16,17 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// ViewModel code behind for ExitNode View.
+    /// ExitNode is a visual representation of Jobs that have exited the system.
+    /// </summary>
     public sealed partial class ExitNode : UserControl
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Model data for ExitNode
+        /// </summary>
         private ExitNodeData data;
 
         #endregion
@@ -38,6 +45,9 @@ namespace ComputerSystemSim
 
         #region Constructors
 
+        /// <summary>
+        /// Create a new ViewModel, create data, set context.
+        /// </summary>
         public ExitNode()
         {
             this.InitializeComponent();

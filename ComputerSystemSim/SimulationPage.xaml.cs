@@ -24,74 +24,34 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ComputerSystemSim
 {
-    public class Output
-    {
-        private double macUtil;
-        private double nextUtil;
-        private double printerUtil;
-        private double w;
-        private double l;
-
-        public double MacUtil { get { return macUtil; } }
-        public double NextUtil { get { return nextUtil; } }
-        public double PrinterUtil { get { return printerUtil; } }
-        public double W { get { return w; } }
-        public double L { get { return l; } }
-
-        public Output(double macUtil, double nextUtil, double printerUtil, double w, double l)
-        {
-            this.macUtil = macUtil;
-            this.nextUtil = nextUtil;
-            this.printerUtil = printerUtil;
-            this.w = w;
-            this.l = l;
-        }
-    }
-
     /// <summary>
+    /// Simulation visualization page where the user can initiate a simulation and 
+    /// watch as the data flows through the system.
+    /// TODO: need to split out Model from this ViewModel
+    /// 
     /// A basic page that provides characteristics common to most applications.
     /// </summary>
     public sealed partial class SimulationPage : ComputerSystemSim.Common.LayoutAwarePage, INotifyPropertyChanged
     {
-        /// <summary>
-        /// Populates the page with content passed during navigation.  Any saved state is also
-        /// provided when recreating a page from a prior session.
-        /// </summary>
-        /// <param name="navigationParameter">The parameter value passed to
-        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested.
-        /// </param>
-        /// <param name="pageState">A dictionary of state preserved by this page during an earlier
-        /// session.  This will be null the first time a page is visited.</param>
-        protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
-        {
-            if (navigationParameter is Input)
-            {
-                totalJobs = (navigationParameter as Input).TotalJobs;
-                warmupJobs = (navigationParameter as Input).WarmupJobs;
-                trials = (navigationParameter as Input).Trials;
-            }
-        }
-
-        /// <summary>
-        /// Preserves state associated with this page in case the application is suspended or the
-        /// page is discarded from the navigation cache.  Values must conform to the serialization
-        /// requirements of <see cref="SuspensionManager.SessionState"/>.
-        /// </summary>
-        /// <param name="pageState">An empty dictionary to be populated with serializable state.</param>
-        protected override void SaveState(Dictionary<String, Object> pageState)
-        {
-        }
-
-
         #region Structs
         
+        /// <summary>
+        /// Struct that holds data once warmup period is reached
+        /// </summary>
         private struct WarmUpValues
         {
+            #region Variables (private)
+
             private bool setPostWarmup;
             private double simClockPostWarmup;
             private double macPostWarmup;
             private double neXTPostWarmup;
             private double printerPostWarmup;
+
+            #endregion
+
+
+            #region Properties
 
             public bool SetPostWarmup { get { return setPostWarmup; } set { setPostWarmup = value; } }
             public double SimClockPostWarmup { get { return simClockPostWarmup; } set { simClockPostWarmup = value; } }
@@ -99,6 +59,14 @@ namespace ComputerSystemSim
             public double NeXTPostWarmup { get { return neXTPostWarmup; } set { neXTPostWarmup = value; } }
             public double PrinterPostWarmup { get { return printerPostWarmup; } set { printerPostWarmup = value; } }
 
+            #endregion
+
+
+            #region Methods
+
+            /// <summary>
+            /// Initialization method
+            /// </summary>
             public void Init()
             {
                 setPostWarmup = false;
@@ -108,6 +76,14 @@ namespace ComputerSystemSim
                 printerPostWarmup = 0;
             }
 
+            /// <summary>
+            /// Sets all variables in struct
+            /// </summary>
+            /// <param name="setPostWarmup"></param>
+            /// <param name="simClockPostWarmup"></param>
+            /// <param name="macPostWarmup"></param>
+            /// <param name="neXTPostWarmup"></param>
+            /// <param name="printerPostWarmup"></param>
             public void Set(bool setPostWarmup, double simClockPostWarmup, double macPostWarmup, double neXTPostWarmup, double printerPostWarmup)
             {
                 this.setPostWarmup = setPostWarmup;
@@ -116,6 +92,8 @@ namespace ComputerSystemSim
                 this.neXTPostWarmup = neXTPostWarmup;
                 this.printerPostWarmup = printerPostWarmup;
             }
+
+            #endregion
         }
 
         #endregion
@@ -123,30 +101,109 @@ namespace ComputerSystemSim
 
         #region Variables (private)
 
+        /// <summary>
+        /// Number of Jobs to run in Steady State
+        /// </summary>
         private int totalJobs = 10000;
-        private int warmupJobs = 1000;
-        private int trials = 30;
-        private const int MAX_PRINTER_JOBS = 10;
-        private const int MILLI_PER_SEC = 1000;
 
+        /// <summary>
+        /// Number of Jobs to run in Warmup
+        /// </summary>
+        private int warmupJobs = 1000;
+
+        /// <summary>
+        /// Number of times to run the simulation
+        /// </summary>
+        private int trials = 30;
+
+        /// <summary>
+        /// Size of printer queue
+        /// </summary>
+        private const int MAX_PRINTER_JOBS = 10;
+
+        /// <summary>
+        /// Min priority queue using heap to organize Jobs based on next event time
+        /// </summary>
         private PriorityQueue<double, Job> jobQueue;
+
+        /// <summary>
+        /// Simulation clock variable for incrementing
+        /// </summary>
         private double simClock = 0;
+
+        /// <summary>
+        /// Struct to hold all values once warmup time reached
+        /// </summary>
         private WarmUpValues warmUpValues;
+
+        /// <summary>
+        /// How many jobs have gone through the system, but not necessarily through every component
+        /// </summary>
         private int completedJobs = 0;
+
+        /// <summary>
+        /// Used to calculate W
+        /// </summary>
         private double totalJobTime = 0;
+
+        /// <summary>
+        /// Jobs that have completed all system components
+        /// </summary>
         private int jobsDone = 0;
+
+        /// <summary>
+        /// Helps determine if job should go straight from NeXT to exit; size of printer queue
+        /// </summary>
         private int printerJobs = 0;
+
+        /// <summary>
+        /// Used to calculate L
+        /// </summary>
         private double totalJobsInSystemArea = 0;
+
+        /// <summary>
+        /// Used to calculate L
+        /// </summary>
         private int prevJobsInSystem = 0;
+
+        /// <summary>
+        /// Used to calculate L
+        /// </summary>
         private double prevJobsTime = 0;
 
+        /// <summary>
+        /// Timer to trigger next event during animation
+        /// </summary>
         private DispatcherTimer timer;
+
+        /// <summary>
+        /// Timer for event progress bar
+        /// </summary>
         private DispatcherTimer timerProg;
+
+        /// <summary>
+        /// Number of milliseconds in a second; used for animation
+        /// </summary>
+        private const int MILLI_PER_SEC = 1000;
+
+        /// <summary>
+        /// Whether UI should be updated due to animation
+        /// </summary>
         private bool animating = true;
+
+        /// <summary>
+        /// If the system has been initialized alread
+        /// </summary>
         private bool initialized = false;
 
+        /// <summary>
+        /// Keep track of number of jobs in system
+        /// </summary>
         private int jobsInSystem = 0;
 
+        /// <summary>
+        /// Each trial is stored in here
+        /// </summary>
         private ObservableCollection<Output> outputs;
 
         #endregion
@@ -201,6 +258,9 @@ namespace ComputerSystemSim
 
         #region Constructors
         
+        /// <summary>
+        /// Sets the data context for this ViewModel
+        /// </summary>
         public SimulationPage()
         {
             this.InitializeComponent(); 
@@ -215,14 +275,48 @@ namespace ComputerSystemSim
             // First random number seed produces bad results, so prime it before app starts
             PseudoRandomGenerator.RandomNumberGenerator();
             
-            // Should separate the data out into its own object type
             this.DataContext = this;
         }
 
         #endregion
 
+
         #region Event handlers
 
+        /// <summary>
+        /// Populates the page with content passed during navigation.  Any saved state is also
+        /// provided when recreating a page from a prior session.
+        /// </summary>
+        /// <param name="navigationParameter">The parameter value passed to
+        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested.
+        /// </param>
+        /// <param name="pageState">A dictionary of state preserved by this page during an earlier
+        /// session.  This will be null the first time a page is visited.</param>
+        protected override void LoadState(Object navigationParameter, Dictionary<String, Object> pageState)
+        {
+            if (navigationParameter is Input)
+            {
+                totalJobs = (navigationParameter as Input).TotalJobs;
+                warmupJobs = (navigationParameter as Input).WarmupJobs;
+                trials = (navigationParameter as Input).Trials;
+            }
+        }
+
+        /// <summary>
+        /// Preserves state associated with this page in case the application is suspended or the
+        /// page is discarded from the navigation cache.  Values must conform to the serialization
+        /// requirements of <see cref="SuspensionManager.SessionState"/>.
+        /// </summary>
+        /// <param name="pageState">An empty dictionary to be populated with serializable state.</param>
+        protected override void SaveState(Dictionary<String, Object> pageState)
+        {
+        }
+
+        /// <summary>
+        /// Adjust animation timescale based on slider input
+        /// </summary>
+        /// <param name="sender">Animation speed slider</param>
+        /// <param name="e"></param>
         private void SpeedSlider_ValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         {
             if (SpeedSlider != null && AnimSpeed != 0)
@@ -232,6 +326,11 @@ namespace ComputerSystemSim
             }
         }
 
+        /// <summary>
+        /// Tick method; every tick fires an simulation event animatino
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void timer_Tick(object sender, object e)
         {
             if (animating)
@@ -257,6 +356,11 @@ namespace ComputerSystemSim
             }
         }
 
+        /// <summary>
+        /// Event progress bar tick
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void timerProg_Tick(object sender, object e)
         {
             if (timerProg.Interval.TotalMilliseconds > 0)
@@ -274,6 +378,11 @@ namespace ComputerSystemSim
             }
         }
 
+        /// <summary>
+        /// Starts the animation
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SimInitBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             animating = true;
@@ -283,6 +392,11 @@ namespace ComputerSystemSim
             SimInitBtn.IsEnabled = false;
         }
 
+        /// <summary>
+        /// Completes a single trial
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void FullSimBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             JobIcon.Visibility = Visibility.Collapsed;
@@ -294,14 +408,72 @@ namespace ComputerSystemSim
 
             // Update the UI with results
             ProgressBar.IsIndeterminate = false;
+
+            double clockDiff = SimClock - warmUpValues.SimClockPostWarmup;
+
+            Output curOutput = new Output(
+                1 - ((Mac.Data.TotalTimeIdle - warmUpValues.MacPostWarmup) / clockDiff),
+                1 - ((NeXT.Data.TotalTimeIdle - warmUpValues.NeXTPostWarmup) / clockDiff),
+                1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / clockDiff),
+                totalJobTime / totalJobs,
+                totalJobsInSystemArea / clockDiff
+                );
+
             RandBox.Text =
-                    "Mac util time: " + (1 - ((Mac.Data.TotalTimeIdle - warmUpValues.MacPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
-                + "\nNeXT util time: " + (1 - ((NeXT.Data.TotalTimeIdle - warmUpValues.NeXTPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
-                + "\nPrinter util time: " + (1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / (SimClock - warmUpValues.SimClockPostWarmup)))
-                + "\nW Avg time per job: " + (totalJobTime / totalJobs) + " for " + jobsDone + " jobs"
-                + "\nL Avg jobs in system: " + (totalJobsInSystemArea / (SimClock - warmUpValues.SimClockPostWarmup));
+                    "Mac util time: " + curOutput.MacUtil
+                + "\nNeXT util time: " + curOutput.NextUtil
+                + "\nPrinter util time: " + curOutput.PrinterUtil
+                + "\nW Avg time per job: " + curOutput.W + " for " + jobsDone + " jobs"
+                + "\nL Avg jobs in system: " + curOutput.L;
+
+            outputs.Add(curOutput);
 
             SimInitBtn.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Completes the entire set of trials.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void RunTrialsBtn_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            while (outputs.Count < trials)
+            {
+                JobIcon.Visibility = Visibility.Collapsed;
+                animating = false;
+                RunTrialsProgressBar.IsIndeterminate = true;
+
+                var dispatcher = CoreApplication.MainView.CoreWindow.Dispatcher;
+                await dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => { ComputeSimulation(); });
+
+
+                double clockDiff = SimClock - warmUpValues.SimClockPostWarmup;
+
+                Output curOutput = new Output(
+                    1 - ((Mac.Data.TotalTimeIdle - warmUpValues.MacPostWarmup) / clockDiff),
+                    1 - ((NeXT.Data.TotalTimeIdle - warmUpValues.NeXTPostWarmup) / clockDiff),
+                    1 - ((Printer.Data.TotalTimeIdle - warmUpValues.PrinterPostWarmup) / clockDiff),
+                    totalJobTime / totalJobs,
+                    totalJobsInSystemArea / clockDiff
+                    );
+
+                RandBox.Text =
+                        "Mac util time: " + curOutput.MacUtil
+                    + "\nNeXT util time: " + curOutput.NextUtil
+                    + "\nPrinter util time: " + curOutput.PrinterUtil
+                    + "\nW Avg time per job: " + curOutput.W + " for " + jobsDone + " jobs"
+                    + "\nL Avg jobs in system: " + curOutput.L;
+
+                outputs.Add(curOutput);
+            }
+
+            // Update the UI with results
+            RunTrialsProgressBar.IsIndeterminate = false;
+
+            SimInitBtn.IsEnabled = true;
+
+            this.Frame.Navigate(typeof(OutputPage), outputs);
         }
 
         #endregion
@@ -309,12 +481,18 @@ namespace ComputerSystemSim
 
         #region Methods
 
+        /// <summary>
+        /// Resets all animation timers.
+        /// </summary>
         private void ResetTimers()
         {
             timer = new DispatcherTimer();
             timerProg = new DispatcherTimer();
         }
 
+        /// <summary>
+        /// Starts animation timers with proper intervals based on slider.
+        /// </summary>
         private void StartTimers()
         {
             timer.Interval = TimeSpan.FromMilliseconds(MILLI_PER_SEC / ConvertSliderVal());
@@ -326,6 +504,10 @@ namespace ComputerSystemSim
             timerProg.Start();
         }
 
+        /// <summary>
+        /// Initializes the simulation and sets all variables to their start state
+        /// TODO: find a better way to do this; probably just create a new data object once Model is made
+        /// </summary>
         private void InitializeSimulation()
         {
             JobIcon.Opacity = 1;
@@ -340,6 +522,7 @@ namespace ComputerSystemSim
             totalJobsInSystemArea = 0;
             prevJobsInSystem = 0;
             prevJobsTime = 0;
+            jobsInSystem = 0;
             Mac.Data.TotalTimeIdle = 0;
             Mac.Data.TimeIdleAgain = 0;
             Mac.Data.JobQueue.Clear();
@@ -367,6 +550,10 @@ namespace ComputerSystemSim
             initialized = true;
         }
 
+        /// <summary>
+        /// Threaded method to complete a single event in the simulation trial.
+        /// Handles both animated and non-animated events.
+        /// </summary>
         private async void ComputeSimulationEvent()
         {
             // Pop next event
@@ -375,7 +562,7 @@ namespace ComputerSystemSim
             // Advance simulation clock
             SimClock = curJob.Value.ArrivalTime;
 
-            // Set necessary variables once warm up period finished
+            // Set necessary warmup variables once steady state reach
             if (completedJobs == warmupJobs && !warmUpValues.SetPostWarmup)
             {
                 warmUpValues.Set(true, SimClock, Mac.Data.TotalTimeIdle, NeXT.Data.TotalTimeIdle, Printer.Data.TotalTimeIdle);
@@ -399,15 +586,17 @@ namespace ComputerSystemSim
                         Point macPos = Mac.TransformToVisual(Window.Current.Content).TransformPoint(new Point(0, 0));
                         Storyboard createJob = AnimateJobCreation(userGroupPos, macPos, (curJob.Value.LocationInSystem as UserGroupData).GroupColor);
                         createJob.SpeedRatio = AnimSpeed;
+                        // Execute and wait for thread
                         await createJob.BeginAsync();
-                        // createJob.Begin();
                     }
+
                     // Spawn new UserGroup event 
                     Job newUGJob = (curJob.Value.LocationInSystem as UserGroupData).GenerateArrival(SimClock);
                     jobQueue.Add(new KeyValuePair<double, Job>(newUGJob.ArrivalTime, newUGJob));
 
                     // Send the current job down the system
                     jobQueue.Add(SystemComponentJobProcess(Mac.Data, curJob.Value, true));
+
                     if (animating)
                     {
                         Mac.Data.JobQueue.Add(curJob.Value);
@@ -423,7 +612,6 @@ namespace ComputerSystemSim
                         triggered.Begin();
                         Mac.Data.JobQueue.Remove(curJob.Value);
                         Mac.Data.NumJobs = Mac.Data.JobQueue.Count;
-                        //await triggered.BeginAsync();
                     }
 
                     curJob = SystemComponentJobProcess(NeXT.Data, curJob.Value, false);
@@ -447,14 +635,15 @@ namespace ComputerSystemSim
                         triggered2.Begin();
                         NeXT.Data.JobQueue.Remove(curJob.Value);
                         NeXT.Data.NumJobs = NeXT.Data.JobQueue.Count;
-                        //await triggered2.BeginAsync();
                     }
 
                     if (printerJobs < MAX_PRINTER_JOBS)
                     {
+                        // Send job to printer if queue isn't full
                         curJob = SystemComponentJobProcess(Printer.Data, curJob.Value, false);
                         jobQueue.Add(curJob);
                         printerJobs++;
+
                         if (animating)
                         {
                             Printer.Data.JobQueue.Add(curJob.Value);
@@ -463,7 +652,9 @@ namespace ComputerSystemSim
                     }
                     else
                     {
+                        // Otherwise, just send it out of the system
                         JobExitSystem(curJob, false);
+
                         if (animating)
                         {
                             ExitSystem.Data.JobQueue.Add(curJob.Value);
@@ -480,7 +671,6 @@ namespace ComputerSystemSim
                         triggered3.Begin();
                         Printer.Data.JobQueue.Remove(curJob.Value);
                         Printer.Data.NumJobs = Printer.Data.JobQueue.Count;
-                        //await triggered3.BeginAsync();
                     }
 
                     JobExitSystem(curJob, true);
@@ -498,6 +688,9 @@ namespace ComputerSystemSim
             }
         }
 
+        /// <summary>
+        /// Runs the simulation until the current trial is completed
+        /// </summary>
         private void ComputeSimulation()
         {
             if (!initialized)
@@ -513,6 +706,9 @@ namespace ComputerSystemSim
             initialized = false;
         }
 
+        /// <summary>
+        /// Updates the values used to calculate L
+        /// </summary>
         private void UpdateJobsArea()
         {
             if (completedJobs > warmupJobs)
@@ -526,9 +722,11 @@ namespace ComputerSystemSim
         }
 
         /// <summary>
-        /// 
+        /// Called once a Job is ready to exit the system.
+        /// Updates variables used to determine L (average number of jobs in system).
+        /// Determines how long job spent in system to determine W.
         /// </summary>
-        /// <param name="curJob"></param>
+        /// <param name="curJob">Job being processed</param>
         /// <param name="includeInMetrics">Those jobs finding 10 or more at the printer will be excluded in the calculation of W.</param>
         private void JobExitSystem(KeyValuePair<double, Job> curJob, bool includeInMetrics)
         {
@@ -548,6 +746,13 @@ namespace ComputerSystemSim
             UpdateJobsArea();
         }
 
+        /// <summary>
+        /// Called when a system component is processing a Job.
+        /// </summary>
+        /// <param name="component">Next component to process job</param>
+        /// <param name="job">Job being processed</param>
+        /// <param name="isMac">If it's the Mac, set SystemEntryTime and increment number of jobs in system for W and L</param>
+        /// <returns></returns>
         private KeyValuePair<double, Job> SystemComponentJobProcess(SystemComponentData component, Job job, bool isMac)
         {
             if (isMac)
@@ -574,6 +779,14 @@ namespace ComputerSystemSim
             return new KeyValuePair<double,Job>(job.ArrivalTime, job);
         }
 
+        /// <summary>
+        /// Helper method to create animation storyboards to animate jobs firing from
+        /// UserGroups to the Mac.
+        /// </summary>
+        /// <param name="from">Point to fire from</param>
+        /// <param name="to">Point to fire at</param>
+        /// <param name="color">Color of object to fire</param>
+        /// <returns>Storyboard of requested animation</returns>
         private Storyboard AnimateJobCreation(Point from, Point to, Color color)
         {            
             // Initialize a new instance of the CompositeTransform which allows you 
@@ -617,6 +830,21 @@ namespace ComputerSystemSim
             return storyboard;
         }
 
+        /// <summary>
+        /// Converts slider value to fraction instead of using negative numbers
+        /// </summary>
+        /// <returns>Fractional representation instead of negative representation</returns>
+        private double ConvertSliderVal()
+        {
+            double rounded = Math.Round(SpeedSlider.Value);
+
+            if (SpeedSlider.Value < 0)
+            {
+                rounded = 1 / Math.Abs(rounded);
+            }
+            return rounded;
+        }
+
         #endregion
 
         #region INotifyPropertyChanged Members
@@ -631,17 +859,6 @@ namespace ComputerSystemSim
             {
                 handler(this, new PropertyChangedEventArgs(name));
             }
-        }
-
-        private double ConvertSliderVal()
-        {
-            double rounded = Math.Round(SpeedSlider.Value);
-
-            if (SpeedSlider.Value < 0)
-            {
-                rounded = 1 / Math.Abs(rounded);
-            }
-            return rounded;
         }
 
         #endregion

@@ -14,6 +14,22 @@
 
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">Computer System Simulation</x:String>
+        <DataTemplate x:Key="OutputsTemplate">
+        	<Grid>
+        		<Grid.ColumnDefinitions>
+        			<ColumnDefinition Width="1*"/>
+        			<ColumnDefinition Width="1*"/>
+        			<ColumnDefinition Width="1*"/>
+        			<ColumnDefinition Width="1*"/>
+        			<ColumnDefinition Width="1*"/>
+        		</Grid.ColumnDefinitions>
+        		<TextBlock x:Name="MacUtilBlock" Text="{Binding MacUtil}" MinWidth="60" Margin="0,0,5,0"/>
+        		<TextBlock x:Name="NextUtilBlock" Text="{Binding NextUtil}" MinWidth="60" Grid.Column="1" Margin="0,0,5,0"/>
+        		<TextBlock x:Name="PrinterUtilBlock" Text="{Binding PrinterUtil}" MinWidth="60" Grid.Column="2" Margin="0,0,5,0"/>
+        		<TextBlock x:Name="WBlock" Text="{Binding W}" MinWidth="60" Grid.Column="3" Margin="0,0,5,0"/>
+        		<TextBlock x:Name="LBlock" Text="{Binding L}" MinWidth="60" Grid.Column="4" Margin="0"/>
+        	</Grid>
+        </DataTemplate>
     </Page.Resources>
 
     <!--
@@ -21,20 +37,64 @@
         * Row 0 contains the back button and page title
         * Row 1 contains the rest of the page layout
     -->
-    <Grid Style="{StaticResource LayoutRootStyle}">
+    <Grid x:Name="LayoutRoot" Style="{StaticResource LayoutRootStyle}">
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition Width="30*"/>
+    		<ColumnDefinition Width="1230*"/>
+    		<ColumnDefinition Width="30*"/>
+    	</Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="140"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="247*"/>
+            <RowDefinition Height="50*"/>
         </Grid.RowDefinitions>
 
         <!-- Back button and page title -->
-        <Grid>
+        <Grid x:Name="Header" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="backButton" Click="GoBack" IsEnabled="{Binding Frame.CanGoBack, ElementName=pageRoot}" Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="pageTitle" Grid.Column="1" Text="Output" Style="{StaticResource PageHeaderTextStyle}"/>
+        </Grid>
+		<Grid x:Name="ListBoxHeaderGrid" Grid.Row="1" Grid.Column="1" Margin="0,50,0,0">
+        	<Grid.ColumnDefinitions>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        	</Grid.ColumnDefinitions>
+        	<TextBlock x:Name="MacUtilBlock" MinWidth="60" Margin="0,0,5,0" Text="MacUtil" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="NextUtilBlock" MinWidth="60" Grid.Column="1" Margin="0,0,5,0" Text="NeXTUtil" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="PrinterUtilBlock" MinWidth="60" Grid.Column="2" Margin="0,0,5,0" Text="PrinterUtil" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="WBlock" MinWidth="60" Grid.Column="3" Margin="0,0,5,0" Text="W" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="LBlock" MinWidth="60" Grid.Column="4" Margin="0" Text="L" Style="{StaticResource SubheaderTextStyle}"/>
+        </Grid>
+        <ScrollViewer Grid.Row="2" Grid.Column="1">
+        	<ListBox x:Name="OutputListbox" Margin="0" ItemTemplate="{StaticResource OutputsTemplate}" ItemsSource="{Binding Outputs}">
+        		<ListBox.ItemContainerTransitions>
+        			<TransitionCollection>
+        				<RepositionThemeTransition/>
+        			</TransitionCollection>
+        		</ListBox.ItemContainerTransitions>
+        	</ListBox>
+        </ScrollViewer>
+		<Grid x:Name="AveragesGrid" Grid.Row="3" Grid.Column="1" VerticalAlignment="Top">
+        	<Grid.ColumnDefinitions>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        		<ColumnDefinition Width="1*"/>
+        	</Grid.ColumnDefinitions>
+        	<TextBlock x:Name="MacUtilAvgBlock" MinWidth="60" Margin="0,0,5,0" Text="{Binding MacUtilAvg}" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="NextUtilAvgBlock" MinWidth="60" Grid.Column="1" Margin="0,0,5,0" Text="{Binding NextUtilAvg}" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="PrinterUtilAvgBlock" MinWidth="60" Grid.Column="2" Margin="0,0,5,0" Text="{Binding PrinterUtilAvg}" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="WAvgBlock" MinWidth="60" Grid.Column="3" Margin="0,0,5,0" Text="{Binding WAvg}" Style="{StaticResource SubheaderTextStyle}"/>
+        	<TextBlock x:Name="LAvgBlock" MinWidth="60" Grid.Column="4" Margin="0" Text="{Binding LAvg}" Style="{StaticResource SubheaderTextStyle}"/>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>

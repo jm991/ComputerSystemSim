@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300" LayoutUpdated="UserControl_LayoutUpdated_1" Width="Auto">
+    d:DesignHeight="300" Width="Auto">
 	<UserControl.Resources>
 		<Storyboard x:Name="Triggered">
 			<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)" Storyboard.TargetName="GroupImage">

@@ -7,10 +7,16 @@ using System.Threading.Tasks;
 
 namespace ComputerSystemSim
 {
+    /// <summary>
+    /// Model data for ExitNode View.
+    /// </summary>
     public class ExitNodeData : INotifyPropertyChanged, Updatable
     {
         #region Variables (private)
 
+        /// <summary>
+        /// Jobs that have exited the system
+        /// </summary>
         private SortedObservableCollection<Job> jobQueue;
 
         #endregion
@@ -77,6 +83,9 @@ namespace ComputerSystemSim
 
         #region Constructors
 
+        /// <summary>
+        /// Sets the lambda for the ObservableCollection to sort based on Job.ArrivalTime.
+        /// </summary>
         public ExitNodeData()
         {
             JobQueue = new SortedObservableCollection<Job>(i => i.ArrivalTime);
